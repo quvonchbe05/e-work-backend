@@ -12,3 +12,4 @@ django-environ
 django-cors-headers
 jwt
 PyJwt
+python-dotenv
