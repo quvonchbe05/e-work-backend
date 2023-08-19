@@ -1,0 +1,14 @@
+asgiref
+Django
+gunicorn
+psycopg2
+sqlparse
+whitenoise
+djangorestframework
+Pillow
+drf-yasg
+djangorestframework-simplejwt
+django-environ
+django-cors-headers
+jwt
+PyJwt
