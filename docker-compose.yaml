@@ -8,4 +8,4 @@ services:
     ports:
       - 2018:7799
     volumes:
-      - .:/app
+      - .:/
