@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Get the latest Python version
+latest_version=$(curl -s https://www.python.org/downloads/ | grep -Po '"latest_version": "\K[^"]+')
+
+# Update the .python-version file
+echo "$latest_version" > .python-version
+
+# Restart the server
+sudo systemctl restart e-work-backend
