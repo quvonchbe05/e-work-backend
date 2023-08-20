@@ -128,9 +128,9 @@ class GenerateNewPassword(APIView):
         new_passwrod = get_random_string(length=8)
         user = get_object_or_404(CustomUser, id=pk)
         if user is not None:
-            user.password = make_password(new_passwrod)
+            user.password = make_password(new_passwrod.lower())
             user.save()
-            return Response(status=201, data={'password': new_passwrod})
+            return Response(status=201, data={'password': new_passwrod.lower()}) 
         else:
             return Response(status=404, data={'error': "User not found!"})
 
