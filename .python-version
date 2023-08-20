@@ -1,2 +1,0 @@
-echo "3.11.2" > .python-version
-sudo systemctl restart e-work-backend

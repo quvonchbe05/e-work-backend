@@ -11,6 +11,6 @@ djangorestframework-simplejwt
 django-environ
 django-cors-headers
 python-dotenv
-jwt==1.2.0
-PyJWT==2.1.0
-cryptography==3.4.8
+jwt
+PyJWT
+cryptography
