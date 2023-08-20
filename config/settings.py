@@ -30,8 +30,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'https://e-work.up.railway.app/swagger/']
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3030',
+    'https://e-work.up.railway.app'
+]
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
