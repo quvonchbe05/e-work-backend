@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics
 from .models import Warehouse
-from .serializers import WarehouseSerializer
+from .serializers import WarehouseSerializer, WarehouseListSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
@@ -10,7 +10,7 @@ class WarehouseList(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Warehouse.objects.all()
-    serializer_class = WarehouseSerializer
+    serializer_class = WarehouseListSerializer
     
     
     
