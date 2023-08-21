@@ -11,10 +11,11 @@ class WarehouseSerializer(serializers.ModelSerializer):
 class UserForWarehouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('name', 'username', 'phone')
+        fields = ('id', 'name', 'username', 'phone')
+ 
  
 class WarehouseListSerializer(serializers.ModelSerializer):
-    worker = UserForWarehouseSerializer
+    worker = UserForWarehouseSerializer()
     class Meta:
         model = Warehouse
         fields = ('id', 'name', 'address', 'worker')
