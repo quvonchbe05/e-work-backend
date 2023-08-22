@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from accounts.models import CustomUser
 from .models import Product, Delivery
 from warehouses.models import Warehouse
 from rest_framework import generics
@@ -6,10 +7,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from .serializers import OrderSerializer, ProductSerializer, DeliverySerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
+from accounts.utils import decode_jwt
 
 
 # Create your views here.
 class ProductCreate(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(request_body=OrderSerializer)
     def post(self, request):
         seralizer = OrderSerializer(data=request.data)
@@ -24,9 +30,12 @@ class ProductCreate(APIView):
             )
 
             new_delivery.save()
+            
+            token = decode_jwt(request)
+            user = get_object_or_404(CustomUser, id=token['user_id'])
+            warehouse = Warehouse.objects.filter(worker=user).first()
 
             for product in products:
-                warehouse = Warehouse.objects.filter(pk=product["warehouse"]).first()
                 if warehouse:
                     new_product = Product(
                         name=product["name"],
