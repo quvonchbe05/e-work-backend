@@ -22,7 +22,7 @@ class OrderSerializer(serializers.Serializer):
 class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('name', 'amount', 'size', 'price')
+        fields = ('id', 'name', 'amount', 'size', 'price')
         
         
         
