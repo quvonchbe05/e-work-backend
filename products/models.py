@@ -2,6 +2,15 @@ from django.db import models
 from warehouses.models import Warehouse
 
 # Create your models here.
+class TemplateProduct(models.Model):
+    name = models.CharField(max_length=255)
+    amount = models.IntegerField()
+    size = models.CharField(max_length=50)
+    price = models.CharField(max_length=155, null=True, blank=True)
+    
+    def __str__(self) -> str:
+        return f"{self.name}"
+
 class Delivery(models.Model):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=15)
@@ -13,10 +22,8 @@ class Delivery(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=255)
-    amount = models.IntegerField()
-    size = models.CharField(max_length=50)
-    price = models.CharField(max_length=155, null=True, blank=True)
+    product = models.ForeignKey(TemplateProduct, on_delete=models.CASCADE, related_name='products', null=True)
+    amount = models.IntegerField(default=0)
     total_price = models.CharField(max_length=255, null=True, blank=True)
     
     date = models.DateTimeField(null=True, blank=True)
@@ -30,7 +37,7 @@ class Product(models.Model):
     description = models.TextField(null=True, blank=True)
     
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.product.name}"
     
     
     

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Delivery
+from .models import Product, Delivery, TemplateProduct
 
 
 class ProductSerializer(serializers.Serializer):
@@ -21,13 +21,13 @@ class OrderSerializer(serializers.Serializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
-        fields = ('id', 'name', 'amount', 'size', 'price', 'total_price')
+        model = TemplateProduct
+        fields = ('id', 'name', 'amount', 'size', 'price')
         
         
         
 class ProductFirstCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
+        model = TemplateProduct
         fields = ('name', 'amount', 'size', 'price')
         

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from accounts.models import CustomUser
-from .models import Product, Delivery
+from .models import Product, Delivery, TemplateProduct
 from warehouses.models import Warehouse
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -44,20 +44,24 @@ class ProductSAdminEdit(APIView):
                 warehouse = Warehouse.objects.filter(worker=user.pk).first()
 
                 for product in products:
-                    if warehouse:
-                        new_product = get_object_or_404(
-                            Product, pk=product["product_id"]
-                        )
-                        new_product.amount = product["amount"]
-                        new_product.description = product["description"]
-                        new_product.delivery = new_delivery
-                        new_product.warehouse = warehouse
-                        new_product.total_price = (
-                            int(new_product.price) * product["amount"]
-                        )
-                        new_product.save()
+                    template_product = TemplateProduct.objects.filter(pk=product['product_id']).first()
+                    if template_product:
+                        if warehouse:
+                            new_product = Product(
+                                product = template_product,
+                                amount = product["amount"],
+                                description = product["description"],
+                                delivery = new_delivery,
+                                warehouse = warehouse,
+                                total_price = (
+                                    int(template_product.price) * product["amount"]
+                                ),
+                            )
+                            new_product.save()
+                        else:
+                            return Response(status=404, data={"error": "Ombor topilmadi!"})
                     else:
-                        return Response(status=404, data={"error": "Ombor topilmadi!"})
+                        return Response(status=404, data={"error": "Maxsulot topilmadi!"})
 
                 return Response(status=201, data={"staus": "success"})
             else:
@@ -66,55 +70,35 @@ class ProductSAdminEdit(APIView):
             return Response(status=400, data={"error": seralizer.errors})
 
 
-class ProductFirstCreate(APIView):
+class ProductFirstCreate(generics.CreateAPIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
-    @swagger_auto_schema(request_body=ProductFirstCreateSerializer)
-    def post(self, request):
-        serializer = ProductFirstCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            new_product = Product(
-                name=request.data["name"],
-                amount=request.data["amount"],
-                size=request.data["size"],
-                price=request.data["price"],
-                total_price=int(request.data["price"]) * request.data["amount"],
-            )
-            new_product.save()
-            return Response(
-                status=201,
-                data={
-                    "name": new_product.name,
-                    "amount": new_product.amount,
-                    "size": new_product.size,
-                    "price": new_product.price,
-                },
-            )
-        else:
-            return Response(status=400, data={"error": serializer.errors})
+    queryset = TemplateProduct.objects.all()
+    serializer_class = ProductFirstCreateSerializer
+    
 
 
-class ProductSearchForS(APIView):
-    def get(self, request, product_name):
-        products = Product.objects.filter(name__icontains=product_name)
-        products_json = []
-        for product in products:
-            products_json.append(
-                {
-                    "id": product.id,
-                    "name": product.name,
-                    "amount": product.amount,
-                    "size": product.size,
-                    "price": product.price,
-                }
-            )
-        return Response(status=200, data=products_json)
+# class ProductSearchForS(APIView):
+#     def get(self, request, product_name):
+#         products = Product.objects.filter(name__icontains=product_name)
+#         products_json = []
+#         for product in products:
+#             products_json.append(
+#                 {
+#                     "id": product.id,
+#                     "name": product.name,
+#                     "amount": product.amount,
+#                     "size": product.size,
+#                     "price": product.price,
+#                 }
+#             )
+#         return Response(status=200, data=products_json)
 
 
 class ProductList(generics.ListAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    queryset = Product.objects.all()
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    queryset = TemplateProduct.objects.all()
     serializer_class = ProductListSerializer
 
 
@@ -137,9 +121,9 @@ def set_to_list(arr):
         all_products.append(
             {
                 "id": product.id,
-                "name": product.name,
+                "name": product.product.name,
                 "amount": product.amount,
-                "price": product.price,
+                "price": product.product.price,
                 "total_price": product.total_price,
                 "delivery": {
                     "id": product.delivery.pk,
@@ -160,9 +144,28 @@ class ProductEditedList(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     def get(self, request):
-        all = Product.objects.filter(warehouse__isnull=False)
-        incoming = Product.objects.filter(delivery__status=True)
-        outgoing = Product.objects.filter(delivery__status=False)
+        all = Product.objects.all()
+        incoming = Product.objects.all(delivery__status=True)
+        outgoing = Product.objects.all(delivery__status=False)
+        all_products = set_to_list(all)
+        incoming_products = set_to_list(incoming)
+        outgoing_products = set_to_list(outgoing)
+
+        return Response(status=200, data={
+            "all": all_products,
+            "incoming": incoming_products,
+            "outgoing": outgoing_products,
+        })
+
+
+
+class ProductByWarehouseList(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        all = Product.objects.filter(warehouse__id=pk)
+        incoming = Product.objects.filter(delivery__status=True, warehouse__id=pk)
+        outgoing = Product.objects.filter(delivery__status=False, warehouse__id=pk)
         all_products = set_to_list(all)
         incoming_products = set_to_list(incoming)
         outgoing_products = set_to_list(outgoing)
