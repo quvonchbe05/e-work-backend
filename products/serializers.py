@@ -2,9 +2,10 @@ from rest_framework import serializers
 from .models import Product, Delivery
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     amount = serializers.IntegerField()
+    description = serializers.CharField()
         
 class DeliverySerializer(serializers.ModelSerializer):
     class Meta:

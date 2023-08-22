@@ -125,7 +125,7 @@ class GenerateNewPassword(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, pk):
-        new_passwrod = get_random_string(length=8)
+        new_passwrod = get_random_string(length=10)
         user = get_object_or_404(CustomUser, id=pk)
         if user is not None:
             user.password = make_password(new_passwrod.lower())

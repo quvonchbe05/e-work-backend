@@ -19,7 +19,7 @@ from accounts.utils import decode_jwt
 
 
 # Create your views here.
-class ProductCreate(APIView):
+class ProductSAdminEdit(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     @swagger_auto_schema(request_body=OrderSerializer)
@@ -28,34 +28,35 @@ class ProductCreate(APIView):
         if seralizer.is_valid():
             products = request.data["products"]
             delivery = request.data["delivery"]
+            status = request.data['status']
 
             new_delivery = Delivery(
                 name=delivery["name"],
                 phone=delivery["phone"],
-                status=delivery["status"],
+                status=status,
             )
 
             new_delivery.save()
             
             token = decode_jwt(request)
-            user = get_object_or_404(CustomUser, id=token['user_id'])
-            warehouse = Warehouse.objects.filter(worker=user).first()
+            if token:
+                user = CustomUser.objects.filter(pk=token['user_id']).first()
+                warehouse = Warehouse.objects.filter(worker=user.pk).first()
 
-            for product in products:
-                if warehouse:
-                    new_product = Product(
-                        name=product["name"],
-                        amount=product["amount"],
-                        size=product["size"],
-                        warehouse=warehouse,
-                        description=product["description"],
-                        delivery=new_delivery,
-                    )
-                    new_product.save()
-                else:
-                    return Response(status=404, data={"error": "Ombor topilmadi!"})
+                for product in products:
+                    if warehouse:
+                        new_product = get_object_or_404(Product, pk=product['product_id'])
+                        new_product.amount = product['amount']
+                        new_product.description = product['description']
+                        new_product.delivery = new_delivery
+                        new_product.warehouse = warehouse
+                        new_product.save()
+                    else:
+                        return Response(status=404, data={"error": "Ombor topilmadi!"})
 
-            return Response(status=201, data={"staus": "success"})
+                return Response(status=201, data={"staus": "success"})
+            else:
+                return Response(status=400, data={'error': "Token mavjud emas"})
         else:
             return Response(status=400, data={'error': seralizer.errors})
 
