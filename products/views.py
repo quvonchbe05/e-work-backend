@@ -125,6 +125,7 @@ def set_to_list(arr):
                 "amount": product.amount,
                 "price": product.product.price,
                 "total_price": product.total_price,
+                "status": product.delivery.status,
                 "delivery": {
                     "id": product.delivery.pk,
                     "name": product.delivery.name,
