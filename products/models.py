@@ -18,11 +18,13 @@ class Product(models.Model):
     size = models.CharField(max_length=50)
     price = models.CharField(max_length=155, null=True, blank=True)
     
+    date = models.DateTimeField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='products')
-    delivery = models.ForeignKey(Delivery, on_delete=models.CASCADE, related_name='products', null=True)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
+    delivery = models.ForeignKey(Delivery, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
     
     description = models.TextField(null=True, blank=True)
     

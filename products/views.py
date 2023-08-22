@@ -6,49 +6,85 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-from .serializers import OrderSerializer, ProductSerializer, DeliverySerializer
+from .serializers import (
+    OrderSerializer, 
+    ProductSerializer, 
+    DeliverySerializer, 
+    ProductListSerializer, 
+    ProductFirstCreateSerializer
+)
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from accounts.utils import decode_jwt
 
 
-# Create your views here.
-class ProductCreate(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    @swagger_auto_schema(request_body=OrderSerializer)
-    def post(self, request):
-        seralizer = OrderSerializer(data=request.data)
-        if seralizer.is_valid():
-            products = request.data["products"]
-            delivery = request.data["delivery"]
+# # Create your views here.
+# class ProductCreate(APIView):
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAuthenticated]
+#     @swagger_auto_schema(request_body=OrderSerializer)
+#     def post(self, request):
+#         seralizer = OrderSerializer(data=request.data)
+#         if seralizer.is_valid():
+#             products = request.data["products"]
+#             delivery = request.data["delivery"]
 
-            new_delivery = Delivery(
-                name=delivery["name"],
-                phone=delivery["phone"],
-                status=delivery["status"],
-            )
+#             new_delivery = Delivery(
+#                 name=delivery["name"],
+#                 phone=delivery["phone"],
+#                 status=delivery["status"],
+#             )
 
-            new_delivery.save()
+#             new_delivery.save()
             
-            token = decode_jwt(request)
-            user = get_object_or_404(CustomUser, id=token['user_id'])
-            warehouse = Warehouse.objects.filter(worker=user).first()
+#             token = decode_jwt(request)
+#             user = get_object_or_404(CustomUser, id=token['user_id'])
+#             warehouse = Warehouse.objects.filter(worker=user).first()
 
-            for product in products:
-                if warehouse:
-                    new_product = Product(
-                        name=product["name"],
-                        amount=product["amount"],
-                        size=product["size"],
-                        warehouse=warehouse,
-                        description=product["description"],
-                        delivery=new_delivery,
-                    )
-                    new_product.save()
-                else:
-                    return Response(status=404, data={"error": "Ombor topilmadi!"})
+#             for product in products:
+#                 if warehouse:
+#                     new_product = Product(
+#                         name=product["name"],
+#                         amount=product["amount"],
+#                         size=product["size"],
+#                         warehouse=warehouse,
+#                         description=product["description"],
+#                         delivery=new_delivery,
+#                     )
+#                     new_product.save()
+#                 else:
+#                     return Response(status=404, data={"error": "Ombor topilmadi!"})
 
-            return Response(status=201, data={"staus": "success"})
+#             return Response(status=201, data={"staus": "success"})
+#         else:
+#             return Response(status=400, data={'error': seralizer.errors})
+
+
+class ProductFirstCreate(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(request_body=ProductFirstCreateSerializer)
+    def post(self, request):
+        serializer = ProductFirstCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            new_product = Product(
+                name=request.data['name'],
+                amount=request.data['amount'],
+                size=request.data['size'],
+                price=request.data['price'],
+            )
+            new_product.save()
+            return Response(status=201, data={
+                'name': new_product.name,
+                'amount': new_product.amount,
+                'size': new_product.size,
+                'price': new_product.price,
+            })
         else:
-            return Response(status=400, data={'error': seralizer.errors})
+            return Response(status=400, data={'error': serializer.errors})
+        
+
+
+class ProductList(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductListSerializer

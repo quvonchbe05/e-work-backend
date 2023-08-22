@@ -17,3 +17,16 @@ class OrderSerializer(serializers.Serializer):
     delivery = DeliverySerializer()
 
 
+
+class ProductListSerializer(serializers.ModelSerializer):
+    delivery = DeliverySerializer()
+    class Meta:
+        model = Product
+        fields = ('name', 'amount', 'size', 'description', 'delivery')
+        
+        
+        
+class ProductFirstCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('name', 'amount', 'size', 'price')
