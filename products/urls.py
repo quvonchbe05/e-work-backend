@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProductFirstCreate, ProductList, ProductSearchForS, ProductSAdminEdit, Units
+from .views import ProductFirstCreate, ProductList, ProductSearchForS, ProductSAdminEdit, Units, ProductTrueList, ProductFalseList, ProductEditedList
 
 
 urlpatterns = [
@@ -8,4 +8,7 @@ urlpatterns = [
     path('sadmin/edit', ProductSAdminEdit.as_view()),
     path('list', ProductList.as_view()),
     path('units', Units.as_view()),
+    path('list/incoming', ProductTrueList.as_view()),
+    path('list/outgoing', ProductFalseList.as_view()),
+    path('list/edited', ProductEditedList.as_view()),
 ]

@@ -110,6 +110,8 @@ class ProductSearchForS(APIView):
 
 
 class ProductList(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Product.objects.all()
     serializer_class = ProductListSerializer
 
@@ -125,3 +127,25 @@ class Units(APIView):
             {"id": 6, "abbreviation": "dona"},
         ]
         return Response(status=200, data=units)
+
+
+
+class ProductEditedList(generics.ListAPIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    queryset = Product.objects.filter(warehouse__isnull=False)
+    serializer_class = ProductListSerializer
+    
+
+class ProductTrueList(generics.ListAPIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    queryset = Product.objects.filter(delivery__status=True)
+    serializer_class = ProductListSerializer
+    
+    
+class ProductFalseList(generics.ListAPIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    queryset = Product.objects.filter(delivery__status=False)
+    serializer_class = ProductListSerializer
