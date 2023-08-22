@@ -52,7 +52,7 @@ class ProductSAdminEdit(APIView):
                         new_product.description = product["description"]
                         new_product.delivery = new_delivery
                         new_product.warehouse = warehouse
-                        new_product.total_price = int(product["price"])*product["amount"]
+                        new_product.total_price = int(new_product.price)*product["amount"]
                         new_product.save()
                     else:
                         return Response(status=404, data={"error": "Ombor topilmadi!"})
@@ -130,11 +130,12 @@ class Units(APIView):
 
 
 
-class ProductEditedList(generics.ListAPIView):
+class ProductEditedList(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
-    queryset = Product.objects.filter(warehouse__isnull=False)
-    serializer_class = ProductListSerializer
+    def get(self, request):
+        all = Product.objects.filter(warehouse__isnull=False)
+
     
 
 class ProductTrueList(generics.ListAPIView):
