@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, get_list_or_404
 from accounts.models import CustomUser
 from .models import Product, Delivery
 from warehouses.models import Warehouse
@@ -11,53 +11,53 @@ from .serializers import (
     ProductSerializer, 
     DeliverySerializer, 
     ProductListSerializer, 
-    ProductFirstCreateSerializer
+    ProductFirstCreateSerializer,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from accounts.utils import decode_jwt
 
 
-# # Create your views here.
-# class ProductCreate(APIView):
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-#     @swagger_auto_schema(request_body=OrderSerializer)
-#     def post(self, request):
-#         seralizer = OrderSerializer(data=request.data)
-#         if seralizer.is_valid():
-#             products = request.data["products"]
-#             delivery = request.data["delivery"]
+# Create your views here.
+class ProductCreate(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(request_body=OrderSerializer)
+    def post(self, request):
+        seralizer = OrderSerializer(data=request.data)
+        if seralizer.is_valid():
+            products = request.data["products"]
+            delivery = request.data["delivery"]
 
-#             new_delivery = Delivery(
-#                 name=delivery["name"],
-#                 phone=delivery["phone"],
-#                 status=delivery["status"],
-#             )
+            new_delivery = Delivery(
+                name=delivery["name"],
+                phone=delivery["phone"],
+                status=delivery["status"],
+            )
 
-#             new_delivery.save()
+            new_delivery.save()
             
-#             token = decode_jwt(request)
-#             user = get_object_or_404(CustomUser, id=token['user_id'])
-#             warehouse = Warehouse.objects.filter(worker=user).first()
+            token = decode_jwt(request)
+            user = get_object_or_404(CustomUser, id=token['user_id'])
+            warehouse = Warehouse.objects.filter(worker=user).first()
 
-#             for product in products:
-#                 if warehouse:
-#                     new_product = Product(
-#                         name=product["name"],
-#                         amount=product["amount"],
-#                         size=product["size"],
-#                         warehouse=warehouse,
-#                         description=product["description"],
-#                         delivery=new_delivery,
-#                     )
-#                     new_product.save()
-#                 else:
-#                     return Response(status=404, data={"error": "Ombor topilmadi!"})
+            for product in products:
+                if warehouse:
+                    new_product = Product(
+                        name=product["name"],
+                        amount=product["amount"],
+                        size=product["size"],
+                        warehouse=warehouse,
+                        description=product["description"],
+                        delivery=new_delivery,
+                    )
+                    new_product.save()
+                else:
+                    return Response(status=404, data={"error": "Ombor topilmadi!"})
 
-#             return Response(status=201, data={"staus": "success"})
-#         else:
-#             return Response(status=400, data={'error': seralizer.errors})
+            return Response(status=201, data={"staus": "success"})
+        else:
+            return Response(status=400, data={'error': seralizer.errors})
 
 
 class ProductFirstCreate(APIView):
@@ -82,6 +82,20 @@ class ProductFirstCreate(APIView):
             })
         else:
             return Response(status=400, data={'error': serializer.errors})
+
+class ProductSearchForS(APIView):
+    def get(self, request, product_name):
+        products = Product.objects.filter(name__icontains=product_name)
+        products_json = []
+        for product in products:
+            products_json.append({
+                'id': product.id,
+                'name': product.name,
+                'amount': product.amount,
+                'size': product.size,
+                'price': product.price,
+            })
+        return Response(status=200, data=products_json)
         
 
 

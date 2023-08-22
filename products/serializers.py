@@ -3,18 +3,18 @@ from .models import Product, Delivery
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ('name', 'amount', 'size', 'description')
+    product_id = serializers.IntegerField()
+    amount = serializers.IntegerField()
         
 class DeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = Delivery
-        fields = ('name', 'phone', 'status')
+        fields = ('name', 'phone')
 
 class OrderSerializer(serializers.Serializer):
     products = serializers.ListSerializer(child=ProductSerializer())
     delivery = DeliverySerializer()
+    status = serializers.BooleanField()
 
 
 
@@ -30,3 +30,4 @@ class ProductFirstCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('name', 'amount', 'size', 'price')
+        
