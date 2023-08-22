@@ -20,8 +20,8 @@ from accounts.utils import decode_jwt
 
 # Create your views here.
 class ProductSAdminEdit(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(request_body=OrderSerializer)
     def post(self, request):
         seralizer = OrderSerializer(data=request.data)
@@ -71,8 +71,8 @@ class ProductSAdminEdit(APIView):
 
 
 class ProductFirstCreate(generics.CreateAPIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = TemplateProduct.objects.all()
     serializer_class = ProductFirstCreateSerializer
     
@@ -96,8 +96,8 @@ class ProductFirstCreate(generics.CreateAPIView):
 
 
 class ProductList(generics.ListAPIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = TemplateProduct.objects.all()
     serializer_class = ProductListSerializer
 
@@ -141,8 +141,8 @@ def set_to_list(arr):
 
 
 class ProductEditedList(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         all = Product.objects.all()
         incoming = Product.objects.all(delivery__status=True)
@@ -160,8 +160,8 @@ class ProductEditedList(APIView):
 
 
 class ProductByWarehouseList(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         all = Product.objects.filter(warehouse__id=pk)
         incoming = Product.objects.filter(delivery__status=True, warehouse__id=pk)
