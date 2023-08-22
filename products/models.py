@@ -17,6 +17,7 @@ class Product(models.Model):
     amount = models.IntegerField()
     size = models.CharField(max_length=50)
     price = models.CharField(max_length=155, null=True, blank=True)
+    total_price = models.CharField(max_length=255, null=True, blank=True)
     
     date = models.DateTimeField(null=True, blank=True)
     

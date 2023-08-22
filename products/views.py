@@ -52,6 +52,7 @@ class ProductSAdminEdit(APIView):
                         new_product.description = product["description"]
                         new_product.delivery = new_delivery
                         new_product.warehouse = warehouse
+                        new_product.total_price = int(product["price"])*product["amount"]
                         new_product.save()
                     else:
                         return Response(status=404, data={"error": "Ombor topilmadi!"})
@@ -75,6 +76,7 @@ class ProductFirstCreate(APIView):
                 amount=request.data["amount"],
                 size=request.data["size"],
                 price=request.data["price"],
+                total_price = int(request.data["price"])*request.data["amount"]
             )
             new_product.save()
             return Response(
@@ -115,11 +117,11 @@ class ProductList(generics.ListAPIView):
 class Units(APIView):
     def get(self, request):
         units = [
-            {"id": 1, "abbreviation": "KG"},
-            {"id": 2, "abbreviation": "TONNA"},
-            {"id": 3, "abbreviation": "LITR"},
-            {"id": 4, "abbreviation": "METR"},
-            {"id": 5, "abbreviation": "SANTIMETR"},
-            {"id": 6, "abbreviation": "DONA"},
+            {"id": 1, "abbreviation": "kg"},
+            {"id": 2, "abbreviation": "tonna"},
+            {"id": 3, "abbreviation": "litr"},
+            {"id": 4, "abbreviation": "metr"},
+            {"id": 5, "abbreviation": "sm"},
+            {"id": 6, "abbreviation": "dona"},
         ]
         return Response(status=200, data=units)
