@@ -20,7 +20,6 @@ class OrderSerializer(serializers.Serializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    delivery = DeliverySerializer()
     class Meta:
         model = Product
         fields = ('name', 'amount', 'size', 'price')
