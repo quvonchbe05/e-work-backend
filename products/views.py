@@ -52,7 +52,9 @@ class ProductSAdminEdit(APIView):
                         new_product.description = product["description"]
                         new_product.delivery = new_delivery
                         new_product.warehouse = warehouse
-                        new_product.total_price = int(new_product.price)*product["amount"]
+                        new_product.total_price = (
+                            int(new_product.price) * product["amount"]
+                        )
                         new_product.save()
                     else:
                         return Response(status=404, data={"error": "Ombor topilmadi!"})
@@ -76,7 +78,7 @@ class ProductFirstCreate(APIView):
                 amount=request.data["amount"],
                 size=request.data["size"],
                 price=request.data["price"],
-                total_price = int(request.data["price"])*request.data["amount"]
+                total_price=int(request.data["price"]) * request.data["amount"],
             )
             new_product.save()
             return Response(
@@ -129,24 +131,44 @@ class Units(APIView):
         return Response(status=200, data=units)
 
 
+def set_to_list(arr):
+    all_products = []
+    for product in arr:
+        all_products.append(
+            {
+                "id": product.id,
+                "name": product.name,
+                "amount": product.amount,
+                "price": product.price,
+                "total_price": product.total_price,
+                "delivery": {
+                    "id": product.delivery.pk,
+                    "name": product.delivery.name,
+                    "phone": product.delivery.phone,
+                },
+                "warehouse": {
+                    "id": product.warehouse.pk,
+                    "name": product.warehouse.name,
+                    "address": product.warehouse.address,
+                },
+            }
+        )
+    return all_products
+
 
 class ProductEditedList(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     def get(self, request):
         all = Product.objects.filter(warehouse__isnull=False)
+        incoming = Product.objects.filter(delivery__status=True)
+        outgoing = Product.objects.filter(delivery__status=False)
+        all_products = set_to_list(all)
+        incoming_products = set_to_list(incoming)
+        outgoing_products = set_to_list(outgoing)
 
-    
-
-class ProductTrueList(generics.ListAPIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
-    queryset = Product.objects.filter(delivery__status=True)
-    serializer_class = ProductListSerializer
-    
-    
-class ProductFalseList(generics.ListAPIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
-    queryset = Product.objects.filter(delivery__status=False)
-    serializer_class = ProductListSerializer
+        return Response(status=200, data={
+            "all": all_products,
+            "incoming": incoming_products,
+            "outgoing": outgoing_products,
+        })
