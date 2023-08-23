@@ -6,7 +6,9 @@ from .views import (
     # ProductSearchForS, 
     Units, 
     ProductEditedList,
-    ProductByWarehouseList
+    ProductByWarehouseList,
+    ProductOutgoing,
+    ProductOutgoingList
 )
 
 
@@ -15,6 +17,8 @@ urlpatterns = [
     path('list', ProductList.as_view()),
     path('list/edited', ProductEditedList.as_view()),
     path('sadmin/edit', ProductSAdminEdit.as_view()),
+    path('sadmin/outgoing', ProductOutgoing.as_view()),
+    path('sadmin/list', ProductOutgoingList.as_view()),
     path('list/warehouse/<int:pk>', ProductByWarehouseList.as_view()),
     path('units', Units.as_view()),
     # path('search/<str:product_name>', ProductSearchForS.as_view()),
