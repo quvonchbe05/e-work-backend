@@ -77,24 +77,6 @@ class ProductFirstCreate(generics.CreateAPIView):
     serializer_class = ProductFirstCreateSerializer
     
 
-
-# class ProductSearchForS(APIView):
-#     def get(self, request, product_name):
-#         products = Product.objects.filter(name__icontains=product_name)
-#         products_json = []
-#         for product in products:
-#             products_json.append(
-#                 {
-#                     "id": product.id,
-#                     "name": product.name,
-#                     "amount": product.amount,
-#                     "size": product.size,
-#                     "price": product.price,
-#                 }
-#             )
-#         return Response(status=200, data=products_json)
-
-
 class ProductList(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -124,6 +106,7 @@ def set_to_list(arr):
                 "name": product.product.name,
                 "amount": product.amount,
                 "price": product.product.price,
+                "size": product.product.size,
                 "total_price": product.total_price,
                 "status": product.delivery.status,
                 "delivery": {
