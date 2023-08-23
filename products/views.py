@@ -67,9 +67,7 @@ class ProductSAdminEdit(APIView):
                                     product=template_product,
                                     amount=product["amount"],
                                     warehouse=warehouse,
-                                    total_price=(
-                                        int(template_product.price) * product["amount"]
-                                    ),
+                                    total_price=int(template_product.price) * product["amount"]
                                 )
                                 new_product_base.save()
 
@@ -79,9 +77,7 @@ class ProductSAdminEdit(APIView):
                                 description=product["description"],
                                 delivery=new_delivery,
                                 warehouse=warehouse,
-                                total_price=(
-                                    int(template_product.price) * product["amount"]
-                                ),
+                                total_price=int(template_product.price) * product["amount"]
                             )
 
                             new_product.save()
@@ -284,9 +280,7 @@ class ProductOutgoing(APIView):
                                     description=product["description"],
                                     delivery=new_delivery,
                                     warehouse=warehouse,
-                                    total_price=(
-                                        int(template_product.price) * product["amount"]
-                                    ),
+                                    total_price=int(template_product.price) * product["amount"]
                                 )
                                 new_product.save()
                                 
