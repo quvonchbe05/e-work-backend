@@ -50,7 +50,6 @@ class ProductBase(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='products_base', null=True, blank=True)
-    delivery = models.ForeignKey(Delivery, on_delete=models.CASCADE, related_name='products_base', null=True, blank=True)
     
     def __str__(self) -> str:
         return f"{self.product.name}"

@@ -48,28 +48,31 @@ class ProductSAdminEdit(APIView):
                     template_product = TemplateProduct.objects.filter(
                         pk=product["product_id"]
                     ).first()
+
                     if template_product:
                         if warehouse:
                             product_base = ProductBase.objects.filter(
                                 product=template_product, warehouse=warehouse
                             ).first()
+
                             if product_base:
                                 product_base.amount += product["amount"]
                                 product_base.total_price = (
                                     (int(template_product.price) * product_base.amount),
                                 )
                                 product_base.save()
+
                             else:
                                 new_product_base = ProductBase(
                                     product=template_product,
                                     amount=product["amount"],
-                                    delivery=new_delivery,
                                     warehouse=warehouse,
                                     total_price=(
                                         int(template_product.price) * product["amount"]
                                     ),
                                 )
                                 new_product_base.save()
+
                             new_product = Product(
                                 product=template_product,
                                 amount=product["amount"],
@@ -80,8 +83,9 @@ class ProductSAdminEdit(APIView):
                                     int(template_product.price) * product["amount"]
                                 ),
                             )
+
                             new_product.save()
-                                
+
                         else:
                             return Response(
                                 status=404, data={"error": "Ombor topilmadi!"}
@@ -202,7 +206,10 @@ class ProductOutgoingList(APIView):
     # permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        incoming = Product.objects.filter(delivery__status=True)
+        token = decode_jwt(request)
+        user = CustomUser.objects.filter(pk=token["user_id"]).first()
+        warehouse = Warehouse.objects.filter(worker=user.pk).first()
+        incoming = ProductBase.objects.filter(warehouse__id=warehouse.pk)
         incoming_products = set_to_list(incoming)
 
         return Response(
@@ -237,7 +244,7 @@ class ProductOutgoing(APIView):
                 warehouse = Warehouse.objects.filter(worker=user.pk).first()
 
                 for product in products:
-                    old_product = Product.objects.filter(
+                    old_product = ProductBase.objects.filter(
                         pk=product["product_id"], delivery__status=True
                     ).first()
                     if old_product:
@@ -245,10 +252,16 @@ class ProductOutgoing(APIView):
                             pk=old_product.product.pk
                         ).first()
                         if warehouse:
+                            
                             if old_product.amount > product["amount"]:
                                 old_product.amount = (
                                     old_product.amount - product["amount"]
                                 )
+                                old_product.total_price = (
+                                    int(template_product.price) * old_product.amount
+                                )
+                                old_product.save()
+                                
                                 new_product = Product(
                                     product=template_product,
                                     amount=product["amount"],
@@ -260,7 +273,7 @@ class ProductOutgoing(APIView):
                                     ),
                                 )
                                 new_product.save()
-                                old_product.save()
+                                
                             else:
                                 return Response(
                                     status=404,
