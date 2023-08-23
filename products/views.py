@@ -157,6 +157,22 @@ def set_to_list(arr):
     return all_products
 
 
+def set_to_s_admin_list(arr):
+    all_products = []
+    for product in arr:
+        all_products.append(
+            {
+                "id": product.id,
+                "name": product.product.name,
+                "amount": product.amount,
+                "price": product.product.price,
+                "size": product.product.size,
+                "total_price": product.total_price,
+            }
+        )
+    return all_products
+
+
 class ProductEditedList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -210,7 +226,7 @@ class ProductOutgoingList(APIView):
         user = CustomUser.objects.filter(pk=token["user_id"]).first()
         warehouse = Warehouse.objects.filter(worker=user.pk).first()
         incoming = ProductBase.objects.filter(warehouse__id=warehouse.pk)
-        incoming_products = set_to_list(incoming)
+        incoming_products = set_to_s_admin_list(incoming)
 
         return Response(
             status=200,
