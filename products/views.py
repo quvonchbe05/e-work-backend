@@ -58,7 +58,7 @@ class ProductSAdminEdit(APIView):
                             if product_base:
                                 product_base.amount += product["amount"]
                                 product_base.total_price = (
-                                    (int(template_product.price) * product_base.amount),
+                                    int(template_product.price) * product_base.amount
                                 )
                                 product_base.save()
 
@@ -67,7 +67,8 @@ class ProductSAdminEdit(APIView):
                                     product=template_product,
                                     amount=product["amount"],
                                     warehouse=warehouse,
-                                    total_price=int(template_product.price) * product["amount"]
+                                    total_price=int(template_product.price)
+                                    * product["amount"],
                                 )
                                 new_product_base.save()
 
@@ -77,7 +78,8 @@ class ProductSAdminEdit(APIView):
                                 description=product["description"],
                                 delivery=new_delivery,
                                 warehouse=warehouse,
-                                total_price=int(template_product.price) * product["amount"]
+                                total_price=int(template_product.price)
+                                * product["amount"],
                             )
 
                             new_product.save()
@@ -264,7 +266,6 @@ class ProductOutgoing(APIView):
                             pk=old_product.product.pk
                         ).first()
                         if warehouse:
-                            
                             if old_product.amount > product["amount"]:
                                 old_product.amount = (
                                     old_product.amount - product["amount"]
@@ -273,17 +274,18 @@ class ProductOutgoing(APIView):
                                     int(template_product.price) * old_product.amount
                                 )
                                 old_product.save()
-                                
+
                                 new_product = Product(
                                     product=template_product,
                                     amount=product["amount"],
                                     description=product["description"],
                                     delivery=new_delivery,
                                     warehouse=warehouse,
-                                    total_price=int(template_product.price) * product["amount"]
+                                    total_price=int(template_product.price)
+                                    * product["amount"],
                                 )
                                 new_product.save()
-                                
+
                             else:
                                 return Response(
                                     status=404,
@@ -323,10 +325,6 @@ class ProductWarehouseHistoryList(APIView):
         )
 
 
-
-
-    
-    
 class ProductWarehouseAllList(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
