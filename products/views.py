@@ -255,3 +255,24 @@ class ProductOutgoing(APIView):
                 return Response(status=400, data={"error": "Token mavjud emas"})
         else:
             return Response(status=400, data={"error": seralizer.errors})
+
+
+
+
+class ProductWarehouseHistoryList(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        
+        token = decode_jwt(request)
+        user = CustomUser.objects.filter(pk=token["user_id"]).first()
+        warehouse = Warehouse.objects.filter(worker=user.pk).first()
+        
+        incoming = Product.objects.filter(warehouse__id=warehouse.pk)
+        incoming_products = set_to_list(incoming)
+
+        return Response(
+            status=200,
+            data=incoming_products,
+        )
