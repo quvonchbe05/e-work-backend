@@ -327,3 +327,21 @@ class ProductWarehouseHistoryList(APIView):
             status=200,
             data=incoming_products,
         )
+
+
+
+
+    
+    
+class ProductWarehouseAllList(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        incoming = ProductBase.objects.filter(warehouse__id=pk)
+        incoming_products = set_to_s_admin_list(incoming)
+
+        return Response(
+            status=200,
+            data=incoming_products,
+        )
