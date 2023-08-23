@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from accounts.models import CustomUser
-from .models import Product, Delivery, TemplateProduct
+from .models import Product, Delivery, TemplateProduct, ProductBase
 from warehouses.models import Warehouse
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -50,6 +50,26 @@ class ProductSAdminEdit(APIView):
                     ).first()
                     if template_product:
                         if warehouse:
+                            product_base = ProductBase.objects.filter(
+                                product=template_product, warehouse=warehouse
+                            ).first()
+                            if product_base:
+                                product_base.amount += product["amount"]
+                                product_base.total_price = (
+                                    (int(template_product.price) * product_base.amount),
+                                )
+                                product_base.save()
+                            else:
+                                new_product_base = ProductBase(
+                                    product=template_product,
+                                    amount=product["amount"],
+                                    delivery=new_delivery,
+                                    warehouse=warehouse,
+                                    total_price=(
+                                        int(template_product.price) * product["amount"]
+                                    ),
+                                )
+                                new_product_base.save()
                             new_product = Product(
                                 product=template_product,
                                 amount=product["amount"],
@@ -61,6 +81,7 @@ class ProductSAdminEdit(APIView):
                                 ),
                             )
                             new_product.save()
+                                
                         else:
                             return Response(
                                 status=404, data={"error": "Ombor topilmadi!"}
@@ -174,8 +195,7 @@ class ProductByWarehouseList(APIView):
                 "outgoing": outgoing_products,
             },
         )
-        
-        
+
 
 class ProductOutgoingList(APIView):
     # authentication_classes = [JWTAuthentication]
@@ -189,6 +209,7 @@ class ProductOutgoingList(APIView):
             status=200,
             data=incoming_products,
         )
+
 
 class ProductOutgoing(APIView):
     # authentication_classes = [JWTAuthentication]
@@ -217,14 +238,17 @@ class ProductOutgoing(APIView):
 
                 for product in products:
                     old_product = Product.objects.filter(
-                        pk=product["product_id"],
-                        delivery__status=True
+                        pk=product["product_id"], delivery__status=True
                     ).first()
                     if old_product:
-                        template_product = TemplateProduct.objects.filter(pk=old_product.product.pk).first()
+                        template_product = TemplateProduct.objects.filter(
+                            pk=old_product.product.pk
+                        ).first()
                         if warehouse:
                             if old_product.amount > product["amount"]:
-                                old_product.amount = old_product.amount-product['amount']
+                                old_product.amount = (
+                                    old_product.amount - product["amount"]
+                                )
                                 new_product = Product(
                                     product=template_product,
                                     amount=product["amount"],
@@ -239,7 +263,8 @@ class ProductOutgoing(APIView):
                                 old_product.save()
                             else:
                                 return Response(
-                                    status=404, data={"error": "Maxsulot soni yetarli emas!"}
+                                    status=404,
+                                    data={"error": "Maxsulot soni yetarli emas!"},
                                 )
                         else:
                             return Response(
@@ -257,18 +282,15 @@ class ProductOutgoing(APIView):
             return Response(status=400, data={"error": seralizer.errors})
 
 
-
-
 class ProductWarehouseHistoryList(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        
         token = decode_jwt(request)
         user = CustomUser.objects.filter(pk=token["user_id"]).first()
         warehouse = Warehouse.objects.filter(worker=user.pk).first()
-        
+
         incoming = Product.objects.filter(warehouse__id=warehouse.pk)
         incoming_products = set_to_list(incoming)
 
