@@ -12,6 +12,7 @@ from .serializers import (
     DeliverySerializer,
     ProductListSerializer,
     ProductFirstCreateSerializer,
+    ProductTemplateEditSerializer,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -337,3 +338,10 @@ class ProductWarehouseAllList(APIView):
             status=200,
             data=incoming_products,
         )
+
+
+class ProductTemplateEdit(generics.UpdateAPIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    queryset = TemplateProduct.objects.all()
+    serializer_class = ProductTemplateEditSerializer

@@ -11,11 +11,13 @@ from .views import (
     ProductOutgoingList,
     ProductWarehouseHistoryList,
     ProductWarehouseAllList,
+    ProductTemplateEdit,
 )
 
 
 urlpatterns = [
     path('create', ProductFirstCreate.as_view()),
+    path('edit/<int:pk>', ProductTemplateEdit.as_view()),
     path('list', ProductList.as_view()),
     path('list/edited', ProductEditedList.as_view()),
     path('sadmin/edit', ProductSAdminEdit.as_view()),
