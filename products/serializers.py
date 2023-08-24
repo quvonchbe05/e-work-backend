@@ -35,4 +35,4 @@ class ProductFirstCreateSerializer(serializers.ModelSerializer):
 class ProductTemplateEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemplateProduct
-        fields = '__all__'
+        fields = ('name', 'amount', 'size', 'price')

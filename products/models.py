@@ -8,6 +8,8 @@ class TemplateProduct(models.Model):
     size = models.CharField(max_length=50)
     price = models.CharField(max_length=155, null=True, blank=True)
     
+    status = models.BooleanField(default=True)
+    
     def __str__(self) -> str:
         return f"{self.name}"
 

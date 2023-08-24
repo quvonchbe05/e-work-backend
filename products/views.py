@@ -343,5 +343,22 @@ class ProductWarehouseAllList(APIView):
 class ProductTemplateEdit(generics.UpdateAPIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
-    queryset = TemplateProduct.objects.all()
+    queryset = TemplateProduct.objects.filter(status=True)
     serializer_class = ProductTemplateEditSerializer
+    
+    
+class ProductTemplateDetail(generics.RetrieveAPIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    queryset = TemplateProduct.objects.filter(status=True)
+    serializer_class = ProductListSerializer
+    
+    
+class PRoductTemplateDelete(APIView):
+    def delete(self, request, pk):
+        product = TemplateProduct.objects.filter(status=True, pk=pk).first()
+        if product:
+            product.delete()
+            return Response(status=200, data={'status': 'success'})
+        else:
+            return Response(status=404, data="Product topilmadi")
