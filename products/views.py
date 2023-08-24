@@ -47,7 +47,8 @@ class ProductSAdminEdit(APIView):
 
                 for product in products:
                     template_product = TemplateProduct.objects.filter(
-                        pk=product["product_id"]
+                        pk=product["product_id"],
+                        status=True
                     ).first()
 
                     if template_product:
@@ -111,7 +112,7 @@ class ProductFirstCreate(generics.CreateAPIView):
 class ProductList(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = TemplateProduct.objects.all()
+    queryset = TemplateProduct.objects.filter(status=True)
     serializer_class = ProductListSerializer
 
 
@@ -264,7 +265,8 @@ class ProductOutgoing(APIView):
                     ).first()
                     if old_product:
                         template_product = TemplateProduct.objects.filter(
-                            pk=old_product.product.pk
+                            pk=old_product.product.pk,
+                            status=True
                         ).first()
                         if warehouse:
                             if old_product.amount > product["amount"]:
@@ -358,7 +360,8 @@ class PRoductTemplateDelete(APIView):
     def delete(self, request, pk):
         product = TemplateProduct.objects.filter(status=True, pk=pk).first()
         if product:
-            product.delete()
+            product.status = False
+            product.save()
             return Response(status=200, data={'status': 'success'})
         else:
             return Response(status=404, data="Product topilmadi")
