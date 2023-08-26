@@ -14,11 +14,13 @@ from .serializers import (
     ProductFirstCreateSerializer,
     ProductTemplateEditSerializer,
     MonitoringSerializer,
+    WarehousesMonitoringSerializer,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from accounts.utils import decode_jwt
 from datetime import datetime, date, timedelta
+from warehouses.models import Warehouse
 
 
 # Create your views here.
@@ -368,8 +370,8 @@ class PRoductTemplateDelete(APIView):
 
 
 class Monitoring(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=MonitoringSerializer)
     def post(self, request):
@@ -439,3 +441,11 @@ class Monitoring(APIView):
 
         products_arr = set_to_list(products)
         return Response(status=200, data=products_arr)
+
+
+
+class WarehousesMonitoring(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehousesMonitoringSerializer
