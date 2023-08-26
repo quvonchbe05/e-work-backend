@@ -380,41 +380,62 @@ class Monitoring(APIView):
 
         today_inthis = datetime.now()
         seven_days_ago = today - timedelta(days=7)
+        
+        warehouse_id = None
+        if request.data['warehouse_id'] != "all":
+            warehouse_id = request.data['warehouse_id']
+        else:
+            warehouse_id = ""
+        
+        product_id = None
+        if request.data['product_id'] != "all":
+            product_id = request.data['product_id']
+        else:
+            product_id = ""
+        
+        status = None
+        if request.data['status'] != "all":
+            status = request.data['status']
+        else:
+            status = ""
 
         if request.data["date_id"] == "1":
             products = Product.objects.filter(
                 created_at__icontains=today,
-                warehouse__id__icontains=request.data['warehouse_id'],
-                product__id__icontains=request.data['product_id'],
-                delivery__status__icontains=request.data["status"],
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+                delivery__status__icontains=status,
             )
         elif request.data["date_id"] == "2":
             products = Product.objects.filter(
                 created_at__icontains=yesterday,
-                warehouse__id__icontains=request.data['warehouse_id'],
-                product__id__icontains=request.data['product_id'],
-                delivery__status__icontains=request.data["status"],
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+                delivery__status__icontains=status,
             )
         elif request.data["date_id"] == "3":
             products = Product.objects.filter(
                 created_at__range=(seven_days_ago, today_inthis),
-                warehouse__id__icontains=request.data['warehouse_id'],
-                product__id__icontains=request.data['product_id'],
-                delivery__status__icontains=request.data["status"],
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+                delivery__status__icontains=status,
             )
         elif request.data["date_id"] == "4":
             products = Product.objects.filter(
                 created_at__icontains=month,
-                warehouse__id__icontains=request.data['warehouse_id'],
-                product__id__icontains=request.data['product_id'],
-                delivery__status__icontains=request.data["status"],
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+                delivery__status__icontains=status,
             )
         else:
             products = Product.objects.filter(
-                warehouse__id__icontains=request.data['warehouse_id'],
-                product__id__icontains=request.data['product_id'],
-                delivery__status__icontains=request.data["status"],
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+                delivery__status__icontains=status,
             )
 
+        print(product_id)
+        print(warehouse_id)
+        print(status)
         products_arr = set_to_list(products)
         return Response(status=200, data=products_arr)
