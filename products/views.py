@@ -437,8 +437,5 @@ class Monitoring(APIView):
                 delivery__status__icontains=status,
             )
 
-        print(product_id)
-        print(warehouse_id)
-        print(status)
         products_arr = set_to_list(products)
         return Response(status=200, data=products_arr)
