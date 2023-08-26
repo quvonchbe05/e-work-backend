@@ -376,6 +376,7 @@ class Monitoring(APIView):
     @swagger_auto_schema(request_body=MonitoringSerializer)
     def post(self, request):
         today = date.today()
+        tomorrow = today + timedelta(days=1)
         yesterday = today - timedelta(days=1)
         month = f"{date.today()}"[:7]
         year = date.today().year
@@ -420,7 +421,7 @@ class Monitoring(APIView):
             )
         elif request.data["date_id"] == "3":
             products = Product.objects.filter(
-                created_at__range=(seven_days_ago, today_inthis),
+                created_at__range=(seven_days_ago, tomorrow),
                 warehouse__id__icontains=warehouse_id,
                 product__id__icontains=product_id,
                 delivery__status__icontains=status,
