@@ -395,10 +395,13 @@ class Monitoring(APIView):
         
         status = None
         if request.data['status'] != "all":
-            status = request.data['status']
+            if request.data['status'] == "1":
+                status = True
+            elif request.data['status'] == "0":
+                status = False
         else:
             status = ""
-
+        
         if request.data["date_id"] == "1":
             products = Product.objects.filter(
                 created_at__icontains=today,
