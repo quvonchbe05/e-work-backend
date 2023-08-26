@@ -13,10 +13,12 @@ from .serializers import (
     ProductListSerializer,
     ProductFirstCreateSerializer,
     ProductTemplateEditSerializer,
+    MonitoringSerializer,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from accounts.utils import decode_jwt
+from datetime import datetime, date, timedelta
 
 
 # Create your views here.
@@ -47,8 +49,7 @@ class ProductSAdminEdit(APIView):
 
                 for product in products:
                     template_product = TemplateProduct.objects.filter(
-                        pk=product["product_id"],
-                        status=True
+                        pk=product["product_id"], status=True
                     ).first()
 
                     if template_product:
@@ -265,8 +266,7 @@ class ProductOutgoing(APIView):
                     ).first()
                     if old_product:
                         template_product = TemplateProduct.objects.filter(
-                            pk=old_product.product.pk,
-                            status=True
+                            pk=old_product.product.pk, status=True
                         ).first()
                         if warehouse:
                             if old_product.amount > product["amount"]:
@@ -347,21 +347,74 @@ class ProductTemplateEdit(generics.UpdateAPIView):
     # permission_classes = [IsAuthenticated]
     queryset = TemplateProduct.objects.filter(status=True)
     serializer_class = ProductTemplateEditSerializer
-    
-    
+
+
 class ProductTemplateDetail(generics.RetrieveAPIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     queryset = TemplateProduct.objects.filter(status=True)
     serializer_class = ProductListSerializer
-    
-    
+
+
 class PRoductTemplateDelete(APIView):
     def delete(self, request, pk):
         product = TemplateProduct.objects.filter(status=True, pk=pk).first()
         if product:
             product.status = False
             product.save()
-            return Response(status=200, data={'status': 'success'})
+            return Response(status=200, data={"status": "success"})
         else:
             return Response(status=404, data="Product topilmadi")
+
+
+class Monitoring(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(request_body=MonitoringSerializer)
+    def post(self, request):
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        month = f"{date.today()}"[:7]
+        year = date.today().year
+
+        today_inthis = datetime.now()
+        seven_days_ago = today - timedelta(days=7)
+
+        if request.data["date_id"] == "1":
+            products = Product.objects.filter(
+                created_at__icontains=today,
+                warehouse__id__icontains=request.data['warehouse_id'],
+                product__id__icontains=request.data['product_id'],
+                delivery__status__icontains=request.data["status"],
+            )
+        elif request.data["date_id"] == "2":
+            products = Product.objects.filter(
+                created_at__icontains=yesterday,
+                warehouse__id__icontains=request.data['warehouse_id'],
+                product__id__icontains=request.data['product_id'],
+                delivery__status__icontains=request.data["status"],
+            )
+        elif request.data["date_id"] == "3":
+            products = Product.objects.filter(
+                created_at__range=(seven_days_ago, today_inthis),
+                warehouse__id__icontains=request.data['warehouse_id'],
+                product__id__icontains=request.data['product_id'],
+                delivery__status__icontains=request.data["status"],
+            )
+        elif request.data["date_id"] == "4":
+            products = Product.objects.filter(
+                created_at__icontains=month,
+                warehouse__id__icontains=request.data['warehouse_id'],
+                product__id__icontains=request.data['product_id'],
+                delivery__status__icontains=request.data["status"],
+            )
+        else:
+            products = Product.objects.filter(
+                warehouse__id__icontains=request.data['warehouse_id'],
+                product__id__icontains=request.data['product_id'],
+                delivery__status__icontains=request.data["status"],
+            )
+
+        products_arr = set_to_list(products)
+        return Response(status=200, data=products_arr)

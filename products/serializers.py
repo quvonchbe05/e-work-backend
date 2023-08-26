@@ -36,3 +36,10 @@ class ProductTemplateEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemplateProduct
         fields = ('name', 'amount', 'size', 'price')
+        
+        
+class MonitoringSerializer(serializers.Serializer):
+    date_id = serializers.CharField()
+    warehouse_id = serializers.CharField()
+    product_id = serializers.CharField()
+    status = serializers.BooleanField()

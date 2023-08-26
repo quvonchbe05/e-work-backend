@@ -14,6 +14,7 @@ from .views import (
     ProductTemplateEdit,
     ProductTemplateDetail,
     PRoductTemplateDelete,
+    Monitoring,
 )
 
 
@@ -32,4 +33,5 @@ urlpatterns = [
     path('list/warehouse/all/<int:pk>', ProductWarehouseAllList.as_view()),
     path('units', Units.as_view()),
     # path('search/<str:product_name>', ProductSearchForS.as_view()),
+    path('monitoring', Monitoring.as_view()),
 ]
