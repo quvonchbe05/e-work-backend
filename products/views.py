@@ -444,14 +444,13 @@ class Monitoring(APIView):
         products_arr = []
         kelgan_summa = 0
         ketgan_summa = 0
-        
-        
+
         for product in products:
             if product.delivery.status == True:
                 kelgan_summa += int(product.total_price)
             else:
                 ketgan_summa += int(product.total_price)
-                
+
             products_arr.append(
                 {
                     "id": product.id,
@@ -475,11 +474,14 @@ class Monitoring(APIView):
                 }
             )
 
-        return Response(status=200, data={
-            'products': products_arr,
-            'kelgan_summa': kelgan_summa,
-            'ketgan_summa': ketgan_summa
-        })
+        return Response(
+            status=200,
+            data={
+                "products": products_arr,
+                "kelgan_summa": kelgan_summa,
+                "ketgan_summa": ketgan_summa,
+            },
+        )
 
 
 class WarehousesMonitoring(generics.ListAPIView):
@@ -487,9 +489,8 @@ class WarehousesMonitoring(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Warehouse.objects.all()
     serializer_class = WarehousesMonitoringSerializer
-    
-    
-    
+
+
 class MonitoringChart(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -525,15 +526,14 @@ class MonitoringChart(APIView):
                 status = False
         else:
             status = ""
-            
+
         # Logic
-        
+
         warehouses = Warehouse.objects.filter(pk__icontains=warehouse_id)
         all_products = Product.objects.all()
         datasets = []
         labels = []
-            
-            
+
         for w in warehouses:
             labels.append(w.name)
             if request.data["date_id"] == "1":
@@ -570,12 +570,36 @@ class MonitoringChart(APIView):
                     product__id__icontains=product_id,
                     delivery__status__icontains=status,
                 )
-                
-            pr = len(products)*100
+
+            pr = len(products) * 100
             foiz = round(pr / len(all_products))
             datasets.append(foiz)
 
-        return Response(status=200, data={
-            'labels': labels,
-            'data': datasets
-        })
+        return Response(
+            status=200,
+            data={
+                "labels": labels,
+                "datasets": [
+                    {
+                        "data": datasets,
+                        "backgroundColor": [
+                            "rgba(255, 99, 132, 0.2)",
+                            "rgba(54, 162, 235, 0.2)",
+                            "rgba(255, 206, 86, 0.2)",
+                            "rgba(75, 192, 192, 0.2)",
+                            "rgba(153, 102, 255, 0.2)",
+                            "rgba(255, 159, 64, 0.2)",
+                        ],
+                        "borderColor": [
+                            "rgba(255, 99, 132, 1)",
+                            "rgba(54, 162, 235, 1)",
+                            "rgba(255, 206, 86, 1)",
+                            "rgba(75, 192, 192, 1)",
+                            "rgba(153, 102, 255, 1)",
+                            "rgba(255, 159, 64, 1)",
+                        ],
+                        "borderWidth": 2,
+                    },
+                ],
+            },
+        )
