@@ -16,6 +16,7 @@ from .views import (
     PRoductTemplateDelete,
     Monitoring,
     WarehousesMonitoring,
+    MonitoringChart,
 )
 
 
@@ -35,5 +36,6 @@ urlpatterns = [
     path('units', Units.as_view()),
     # path('search/<str:product_name>', ProductSearchForS.as_view()),
     path('monitoring', Monitoring.as_view()),
-    path('monitoring/warehouses', WarehousesMonitoring.as_view())
+    path('monitoring/warehouses', WarehousesMonitoring.as_view()),
+    path('monitoring/chart', MonitoringChart.as_view()),
 ]
