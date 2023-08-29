@@ -370,8 +370,8 @@ class PRoductTemplateDelete(APIView):
 
 
 class Monitoring(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=MonitoringSerializer)
     def post(self, request):
@@ -382,28 +382,28 @@ class Monitoring(APIView):
 
         today_inthis = datetime.now()
         seven_days_ago = today - timedelta(days=7)
-        
+
         warehouse_id = None
-        if request.data['warehouse_id'] != "all":
-            warehouse_id = request.data['warehouse_id']
+        if request.data["warehouse_id"] != "all":
+            warehouse_id = request.data["warehouse_id"]
         else:
             warehouse_id = ""
-        
+
         product_id = None
-        if request.data['product_id'] != "all":
-            product_id = request.data['product_id']
+        if request.data["product_id"] != "all":
+            product_id = request.data["product_id"]
         else:
             product_id = ""
-        
+
         status = None
-        if request.data['status'] != "all":
-            if request.data['status'] == "1":
+        if request.data["status"] != "all":
+            if request.data["status"] == "1":
                 status = True
-            elif request.data['status'] == "0":
+            elif request.data["status"] == "0":
                 status = False
         else:
             status = ""
-        
+
         if request.data["date_id"] == "1":
             products = Product.objects.filter(
                 created_at__icontains=today,
@@ -439,9 +439,45 @@ class Monitoring(APIView):
                 delivery__status__icontains=status,
             )
 
-        products_arr = set_to_list(products)
-        return Response(status=200, data=products_arr)
+        products_arr = []
+        kelgan_summa = 0
+        ketgan_summa = 0
+        
+        
+        for product in products:
+            if product.delivery.status == True:
+                kelgan_summa += int(product.product.price)*product.amount
+            else:
+                ketgan_summa += int(product.product.price)*product.amount
+                
+            products_arr.append(
+                {
+                    "id": product.id,
+                    "name": product.product.name,
+                    "amount": product.amount,
+                    "price": product.product.price,
+                    "size": product.product.size,
+                    "total_price": product.total_price,
+                    "status": product.delivery.status,
+                    "date": product.created_at,
+                    "delivery": {
+                        "id": product.delivery.pk,
+                        "name": product.delivery.name,
+                        "phone": product.delivery.phone,
+                    },
+                    "warehouse": {
+                        "id": product.warehouse.pk,
+                        "name": product.warehouse.name,
+                        "address": product.warehouse.address,
+                    },
+                }
+            )
 
+        return Response(status=200, data={
+            'products': products_arr,
+            'kelgan_summa': kelgan_summa,
+            'ketgan_summa': ketgan_summa
+        })
 
 
 class WarehousesMonitoring(generics.ListAPIView):
@@ -449,3 +485,6 @@ class WarehousesMonitoring(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Warehouse.objects.all()
     serializer_class = WarehousesMonitoringSerializer
+
+
+
