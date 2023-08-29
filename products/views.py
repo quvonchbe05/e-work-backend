@@ -530,13 +530,14 @@ class MonitoringChart(APIView):
         # Logic
 
         warehouses = Warehouse.objects.filter(pk__icontains=warehouse_id)
-        all_products = Product.objects.all()
+        
         datasets = []
         labels = []
 
         for w in warehouses:
             labels.append(w.name)
             if request.data["date_id"] == "1":
+                all_products = Product.objects.filter(created_at__icontains=today)
                 products = Product.objects.filter(
                     created_at__icontains=today,
                     warehouse__id__icontains=w.pk,
@@ -544,6 +545,7 @@ class MonitoringChart(APIView):
                     delivery__status__icontains=status,
                 )
             elif request.data["date_id"] == "2":
+                all_products = Product.objects.filter(created_at__icontains=yesterday)
                 products = Product.objects.filter(
                     created_at__icontains=yesterday,
                     warehouse__id__icontains=w.pk,
@@ -551,6 +553,7 @@ class MonitoringChart(APIView):
                     delivery__status__icontains=status,
                 )
             elif request.data["date_id"] == "3":
+                all_products = Product.objects.filter(created_at__range=(seven_days_ago, tomorrow),)
                 products = Product.objects.filter(
                     created_at__range=(seven_days_ago, tomorrow),
                     warehouse__id__icontains=w.pk,
@@ -558,6 +561,7 @@ class MonitoringChart(APIView):
                     delivery__status__icontains=status,
                 )
             elif request.data["date_id"] == "4":
+                all_products = Product.objects.filter(created_at__icontains=month)
                 products = Product.objects.filter(
                     created_at__icontains=month,
                     warehouse__id__icontains=w.pk,
@@ -565,6 +569,7 @@ class MonitoringChart(APIView):
                     delivery__status__icontains=status,
                 )
             else:
+                all_products = Product.objects.all()
                 products = Product.objects.filter(
                     warehouse__id__icontains=w.pk,
                     product__id__icontains=product_id,
