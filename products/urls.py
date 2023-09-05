@@ -17,6 +17,7 @@ from .views import (
     Monitoring,
     WarehousesMonitoring,
     MonitoringChart,
+    MonitoringLineChart,
 )
 
 
@@ -38,4 +39,5 @@ urlpatterns = [
     path('monitoring', Monitoring.as_view()),
     path('monitoring/warehouses', WarehousesMonitoring.as_view()),
     path('monitoring/chart', MonitoringChart.as_view()),
+    path('monitoring/linechart', MonitoringLineChart.as_view()),
 ]

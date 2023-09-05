@@ -21,7 +21,7 @@ from rest_framework.permissions import IsAuthenticated
 from accounts.utils import decode_jwt
 from datetime import datetime, date, timedelta
 from warehouses.models import Warehouse
-import math
+from django.db.models.aggregates import Sum
 
 
 # Create your views here.
@@ -379,7 +379,7 @@ class Monitoring(APIView):
         today = date.today()
         tomorrow = today + timedelta(days=1)
         yesterday = today - timedelta(days=1)
-        month = f"{date.today()}"[:7]
+        month = f"{date.today() + timedelta(days=1)}"[:7]
         year = date.today().year
 
         today_inthis = datetime.now()
@@ -500,7 +500,7 @@ class MonitoringChart(APIView):
         today = date.today()
         tomorrow = today + timedelta(days=1)
         yesterday = today - timedelta(days=1)
-        month = f"{date.today()}"[:7]
+        month = f"{date.today() + timedelta(days=1)}"[:7]
         year = date.today().year
 
         today_inthis = datetime.now()
@@ -530,7 +530,7 @@ class MonitoringChart(APIView):
         # Logic
 
         warehouses = Warehouse.objects.filter(pk__icontains=warehouse_id)
-        
+
         datasets = []
         labels = []
 
@@ -553,7 +553,9 @@ class MonitoringChart(APIView):
                     delivery__status__icontains=status,
                 )
             elif request.data["date_id"] == "3":
-                all_products = Product.objects.filter(created_at__range=(seven_days_ago, tomorrow),)
+                all_products = Product.objects.filter(
+                    created_at__range=(seven_days_ago, tomorrow),
+                )
                 products = Product.objects.filter(
                     created_at__range=(seven_days_ago, tomorrow),
                     warehouse__id__icontains=w.pk,
@@ -608,3 +610,117 @@ class MonitoringChart(APIView):
                 ],
             },
         )
+
+
+class MonitoringLineChart(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(request_body=MonitoringSerializer)
+    def post(self, request):
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        yesterday = today - timedelta(days=1)
+        month = f"{date.today() + timedelta(days=1)}"[:7]
+        year = date.today().year
+
+        today_inthis = datetime.now()
+        seven_days_ago = today - timedelta(days=7)
+
+        warehouse_id = None
+        if request.data["warehouse_id"] != "all":
+            warehouse_id = request.data["warehouse_id"]
+        else:
+            warehouse_id = ""
+
+        product_id = None
+        if request.data["product_id"] != "all":
+            product_id = request.data["product_id"]
+        else:
+            product_id = ""
+
+        status = None
+        if request.data["status"] != "all":
+            if request.data["status"] == "1":
+                status = True
+            elif request.data["status"] == "0":
+                status = False
+        else:
+            status = ""
+
+        # Logic
+        if request.data["date_id"] == "1":
+            product_dates = Product.objects.filter(
+                created_at__icontains=today,
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+            )
+        elif request.data["date_id"] == "2":
+            product_dates = Product.objects.filter(
+                created_at__icontains=yesterday,
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+            )
+        elif request.data["date_id"] == "3":
+            product_dates = Product.objects.filter(
+                created_at__range=(seven_days_ago, tomorrow),
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+            )
+        elif request.data["date_id"] == "4":
+            product_dates = Product.objects.filter(
+                created_at__icontains=month,
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+            )
+        else:
+            product_dates = Product.objects.filter(
+                warehouse__id__icontains=warehouse_id,
+                product__id__icontains=product_id,
+                delivery__status__icontains=status,
+            )
+
+        products_arr = []
+
+        unique_data = []
+        dateSet = set()
+        for pr in product_dates:
+            created_at = pr.created_at.date()
+            if created_at not in dateSet:
+                unique_data.append(created_at)
+                dateSet.add(created_at)
+
+        for d in unique_data:
+            ketgan_summa = Product.objects.filter(
+                created_at__icontains=d, delivery__status=False, product__id__icontains=product_id,
+            )
+            ketgan_total_price = 0
+            for ketgan in ketgan_summa:
+                if status == False:
+                    ketgan_total_price += int(ketgan.total_price)
+                elif status == "":
+                    ketgan_total_price += int(ketgan.total_price)
+                else:
+                    ketgan_total_price = 0
+
+
+
+            kelgan_summa = Product.objects.filter(
+                created_at__icontains=d, delivery__status=True, product__id__icontains=product_id,
+            )
+            kelgan_total_price = 0
+            for kelgan in kelgan_summa:
+                if status == True:
+                    kelgan_total_price += int(kelgan.total_price)
+                elif status == "":
+                    kelgan_total_price += int(kelgan.total_price)
+                else:
+                    kelgan_total_price = 0
+
+
+
+            products_arr.append(
+                {"date": d, "ketgan": ketgan_total_price, "kelgan": kelgan_total_price}
+            )
+
+        return Response(products_arr)
