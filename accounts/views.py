@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from django.utils.crypto import get_random_string
+import random
 from .utils import decode_jwt
 
 # Create your views here.
@@ -125,7 +126,7 @@ class GenerateNewPassword(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, pk):
-        new_passwrod = get_random_string(length=10)
+        new_passwrod = random.randint(11111111, 99999999)
         user = get_object_or_404(CustomUser, id=pk)
         if user is not None:
             user.password = make_password(new_passwrod.lower())
