@@ -18,6 +18,7 @@ from .views import (
     WarehousesMonitoring,
     MonitoringChart,
     MonitoringLineChart,
+    ProductTemplateHistory,
 )
 
 
@@ -40,4 +41,6 @@ urlpatterns = [
     path('monitoring/warehouses', WarehousesMonitoring.as_view()),
     path('monitoring/chart', MonitoringChart.as_view()),
     path('monitoring/linechart', MonitoringLineChart.as_view()),
+    
+    path('list/view/<int:pk>', ProductTemplateHistory.as_view())
 ]

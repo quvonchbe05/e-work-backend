@@ -39,6 +39,27 @@ class ProductTemplateEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemplateProduct
         fields = ("name", "amount", "size", "price")
+        
+
+class ProductTemplateHistorySerializer(serializers.ModelSerializer):
+    products_base = serializers.SerializerMethodField()
+
+    def get_products_base(self, obj):
+        return [
+            {
+                "id": p.id,
+                "amount": p.amount,
+                "total_price": p.total_price,
+                "warehouse": {
+                    "name": p.warehouse.name,    
+                    "address": p.warehouse.address
+                },
+            }
+            for p in obj.products_base.all()
+        ]
+    class Meta:
+        model = TemplateProduct
+        fields = ("name", "size", "price", "products_base")
 
 
 class MonitoringSerializer(serializers.Serializer):

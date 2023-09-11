@@ -15,6 +15,7 @@ from .serializers import (
     ProductTemplateEditSerializer,
     MonitoringSerializer,
     WarehousesMonitoringSerializer,
+    ProductTemplateHistorySerializer,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -351,6 +352,19 @@ class ProductTemplateEdit(generics.UpdateAPIView):
     queryset = TemplateProduct.objects.filter(status=True)
     serializer_class = ProductTemplateEditSerializer
 
+
+class ProductTemplateHistory(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    # queryset = TemplateProduct.objects.filter(status=True)
+    # serializer_class = ProductTemplateHistorySerializer
+    def get(self, request, pk):
+        template_products = TemplateProduct.objects.filter(pk=pk).first()
+        if template_products:
+            serializer = ProductTemplateHistorySerializer(template_products)
+            return Response(status=200, data=serializer.data)
+        else:
+            return Response(status=404, data="not found!")
 
 class ProductTemplateDetail(generics.RetrieveAPIView):
     authentication_classes = [JWTAuthentication]
