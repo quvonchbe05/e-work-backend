@@ -25,15 +25,21 @@ class UserCreateSerializer(serializers.Serializer):
 
 class UserListSerializer(serializers.ModelSerializer):
     warehouse = serializers.SerializerMethodField()
+    object = serializers.SerializerMethodField()
     
     def get_warehouse(self, obj):
         whs = [{'name':wh.name,'address':wh.address} for wh in obj.warehouse.all()]
         if len(whs):
             return whs[0]
+        
+    def get_object(self, obj):
+        obj = [{'name':ob.name,'address':ob.address} for ob in obj.object.all()]
+        if len(obj):
+            return obj[0]
     
     class Meta:
         model = CustomUser
-        fields = ('id', 'name', 'phone', 'username', 'warehouse', 'role')
+        fields = ('id', 'name', 'phone', 'username', 'warehouse', 'object', 'role')
         
         
         
