@@ -99,6 +99,7 @@ class UserCreate(APIView):
                 name=request.data['name'],
                 phone=request.data['phone'],
                 username = request.data['username'],
+                role = request.data['role'],
                 password = make_password(random_password),
             )
             new_user.save()

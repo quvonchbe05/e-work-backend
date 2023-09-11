@@ -20,6 +20,7 @@ class UserCreateSerializer(serializers.Serializer):
     name = serializers.CharField()
     phone = serializers.CharField()
     username = serializers.CharField()
+    role = serializers.CharField()
     
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -32,11 +33,11 @@ class UserListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CustomUser
-        fields = ('id', 'name', 'phone', 'username', 'warehouse')
+        fields = ('id', 'name', 'phone', 'username', 'warehouse', 'role')
         
         
         
 class UserEditSerilizer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('name', 'phone', 'username')
+        fields = ('name', 'phone', 'username', 'role')
