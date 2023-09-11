@@ -296,7 +296,7 @@ class ProductOutgoing(APIView):
                             else:
                                 return Response(
                                     status=404,
-                                    data={"error": "Maxsulot soni yetarli emas!"},
+                                    data={"error": f"{old_product.product.name} soni yetarli emas!"},
                                 )
                         else:
                             return Response(
