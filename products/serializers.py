@@ -8,7 +8,7 @@ from warehouses.serializers import UserForWarehouseSerializer
 class ProductSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     amount = serializers.IntegerField()
-    description = serializers.CharField(allow_null=True, allow_blank=False)
+    description = serializers.CharField(allow_null=True, allow_blank=True)
 
 
 class DeliverySerializer(serializers.ModelSerializer):
