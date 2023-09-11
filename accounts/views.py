@@ -145,7 +145,7 @@ class GenerateNewPassword(APIView):
 class UserList(generics.ListAPIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
-    queryset = CustomUser.objects.filter(role='s_admin').order_by('-pk')
+    queryset = CustomUser.objects.exclude(role='m_admin').order_by('-pk')
     serializer_class = UserListSerializer
  
 
@@ -157,7 +157,7 @@ class UserList(generics.ListAPIView):
 class UserEdit(generics.UpdateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = CustomUser.objects.filter(role='s_admin').order_by('-pk')
+    queryset = CustomUser.objects.exclude(role='m_admin').order_by('-pk')
     serializer_class = UserEditSerilizer
     
     
@@ -169,7 +169,7 @@ class UserEdit(generics.UpdateAPIView):
 class UserDelete(generics.DestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = CustomUser.objects.filter(role='s_admin').order_by('-pk')
+    queryset = CustomUser.objects.exclude(role='m_admin').order_by('-pk')
     serializer_class = UserEditSerilizer
     
     
@@ -181,7 +181,7 @@ class UserDelete(generics.DestroyAPIView):
 class UserDetail(generics.RetrieveAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = CustomUser.objects.filter(role='s_admin').order_by('-pk')
+    queryset = CustomUser.objects.exclude(role='m_admin').order_by('-pk')
     serializer_class = UserListSerializer
     
     
