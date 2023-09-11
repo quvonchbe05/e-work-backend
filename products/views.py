@@ -266,7 +266,8 @@ class ProductOutgoing(APIView):
 
                 for product in products:
                     old_product = ProductBase.objects.filter(
-                        product__id=product["product_id"]
+                        product__id=product["product_id"],
+                        warehouse__id=warehouse.pk
                     ).first()
                     if old_product:
                         template_product = TemplateProduct.objects.filter(
