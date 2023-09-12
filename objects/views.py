@@ -17,8 +17,8 @@ class ObjectList(generics.ListAPIView):
     
     
 class ObjectCreate(generics.CreateAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
     

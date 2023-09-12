@@ -16,3 +16,8 @@ class CustomUser(AbstractUser):
     def save(self, **kwargs):
         super().save(**kwargs)
         self.password = make_password(self.password)
+        
+        
+class DeviceToken(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    token = models.CharField(max_length=255)
