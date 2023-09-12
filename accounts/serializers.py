@@ -33,7 +33,7 @@ class UserListSerializer(serializers.ModelSerializer):
             return whs[0]
         
     def get_object(self, obj):
-        obj = [{'id': obj.pk, 'name':ob.name,'address':ob.address} for ob in obj.object.all()]
+        obj = [{'id': ob.pk, 'name':ob.name,'address':ob.address} for ob in obj.object.all()]
         if len(obj):
             return obj[0]
     
