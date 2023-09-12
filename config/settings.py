@@ -14,8 +14,6 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
-from firebase_admin import initialize_app
-FIREBASE_APP = initialize_app()
 
 load_dotenv()
 
@@ -51,7 +49,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'corsheaders',
-    'fcm_django',
     'accounts',
     'warehouses',
     'products',
@@ -220,8 +217,3 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
-
-FCM_DJANGO_SETTINGS = {
-        "FCM_SERVER_KEY": "AIzaSyAweODwWAa3klYmgJLjNoBL9cvTJDn8BLI"
-} 
