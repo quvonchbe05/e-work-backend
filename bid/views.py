@@ -1,15 +1,21 @@
 from django.shortcuts import render
 from .models import Bid, BidProduct
-from .serializers import BidCreateSerializer
+from .serializers import BidCreateSerializer, BidListSerializer
 from products.models import TemplateProduct
 from objects.models import Object
+from accounts.models import CustomUser
 from rest_framework import generics
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from accounts.utils import decode_jwt
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 # Create your views here.
-class CreateBitForM(APIView):
+class CreateBidForM(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(request_body=BidCreateSerializer)
     def post(self, request):
         
@@ -42,3 +48,44 @@ class CreateBitForM(APIView):
 
         else:
             return Response(status=400, data={"error": serializer.errors})
+
+
+
+class BidMyList(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        token = decode_jwt(request)
+        if not token:
+            return Response(status=404, data={'error': "invalid token"})
+        user = CustomUser.objects.filter(id=token['user_id']).first()
+        if not user:
+            return Response(status=404, data={'error': "invalid token"})
+        
+        
+        object = Object.objects.filter(worker__pk=user.pk).first()
+        if not object:
+            return Response(status=404, data={'error': "obyekt topilmadi"})
+        
+        
+        bid = Bid.objects.filter(object__pk=object.pk)
+        bid_arr = []
+        
+        for b in bid:
+            bid_arr.append({
+                'id': b.pk,
+                'status': b.status,
+                'created_at': b.created_at
+            })
+        
+            products = BidProduct.objects.filter(bid__pk=b.pk)
+            for p in products:
+                b['products'].append({
+                    'id': p.pk,
+                    'name': p.product.name,
+                    'amount': p.amount
+                })
+        
+        
+        return Response(status=200, data=bid_arr)
+    

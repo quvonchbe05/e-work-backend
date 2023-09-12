@@ -28,12 +28,12 @@ class UserListSerializer(serializers.ModelSerializer):
     object = serializers.SerializerMethodField()
     
     def get_warehouse(self, obj):
-        whs = [{'name':wh.name,'address':wh.address} for wh in obj.warehouse.all()]
+        whs = [{'id': wh.pk, 'name':wh.name,'address':wh.address} for wh in obj.warehouse.all()]
         if len(whs):
             return whs[0]
         
     def get_object(self, obj):
-        obj = [{'name':ob.name,'address':ob.address} for ob in obj.object.all()]
+        obj = [{'id': obj.pk, 'name':ob.name,'address':ob.address} for ob in obj.object.all()]
         if len(obj):
             return obj[0]
     

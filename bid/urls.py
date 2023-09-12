@@ -1,8 +1,10 @@
 from django.urls import path,include
 from .views import (
-    CreateBitForM,
+    CreateBidForM,
+    BidMyList,
 )
 
 urlpatterns = [
-    path('m/create', CreateBitForM.as_view()),
+    path('object/create', CreateBidForM.as_view()),
+    path('object/history', BidMyList.as_view())
 ]
