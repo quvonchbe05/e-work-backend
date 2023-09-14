@@ -98,7 +98,7 @@ class GetBidById(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     def get(self, request, pk):
-        bid = Bid.objects.filter(object__pk=pk).first()
+        bid = Bid.objects.filter(pk=pk).first()
         bid_arr = []
         
         if not bid:
