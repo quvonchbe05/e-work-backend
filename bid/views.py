@@ -78,8 +78,8 @@ class BidMyList(APIView):
             bid_arr.append({
                 'id': b.pk,
                 'status': b.status,
-                'description': b.description
-                'created_at': b.created_at
+                'description': b.description,
+                'created_at': b.created_at,
             })
         
             products = BidProduct.objects.filter(bid__pk=b.pk)
