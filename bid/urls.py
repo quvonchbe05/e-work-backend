@@ -6,5 +6,5 @@ from .views import (
 
 urlpatterns = [
     path('object/create', CreateBidForM.as_view()),
-    path('object/history', BidMyList.as_view())
+    path('object/history', BidMyList.as_view()),
 ]

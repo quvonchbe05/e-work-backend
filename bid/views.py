@@ -44,7 +44,10 @@ class CreateBidForM(APIView):
                 )
                 new_bid_product.save()
 
-            return Response(status=201, data={"status": "success"})
+            return Response(status=201, data={
+                "status": "success",
+                "bid_id": new_bid.pk
+            })
 
         else:
             return Response(status=400, data={"error": serializer.errors})
