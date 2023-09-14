@@ -4,6 +4,7 @@ from .serializers import BidCreateSerializer, BidListSerializer
 from products.models import TemplateProduct
 from objects.models import Object
 from accounts.models import CustomUser
+from products.models import ProductBase
 from rest_framework import generics
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
@@ -12,13 +13,14 @@ from accounts.utils import decode_jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
+
 # Create your views here.
 class CreateBidForM(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(request_body=BidCreateSerializer)
     def post(self, request):
-        
         serializer = BidCreateSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -44,112 +46,168 @@ class CreateBidForM(APIView):
                 )
                 new_bid_product.save()
 
-            return Response(status=201, data={
-                "status": "success",
-                "bid_id": new_bid.pk
-            })
+            return Response(
+                status=201, data={"status": "success", "bid_id": new_bid.pk}
+            )
 
         else:
             return Response(status=400, data={"error": serializer.errors})
 
 
-
 class BidMyList(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         token = decode_jwt(request)
         if not token:
-            return Response(status=404, data={'error': "invalid token"})
-        user = CustomUser.objects.filter(id=token['user_id']).first()
+            return Response(status=404, data={"error": "invalid token"})
+        user = CustomUser.objects.filter(id=token["user_id"]).first()
         if not user:
-            return Response(status=404, data={'error': "invalid token"})
-        
-        
+            return Response(status=404, data={"error": "invalid token"})
+
         object = Object.objects.filter(worker__pk=user.pk).first()
         if not object:
-            return Response(status=404, data={'error': "obyekt topilmadi"})
-        
-        
+            return Response(status=404, data={"error": "obyekt topilmadi"})
+
         bid = Bid.objects.filter(object__pk=object.pk)
         bid_arr = []
-        
+
         for b in bid:
-            bid_arr.append({
-                'id': b.pk,
-                'status': b.status,
-                'description': b.description,
-                'created_at': b.created_at,
-            })
-        
+            bid_arr.append(
+                {
+                    "id": b.pk,
+                    "status": b.status,
+                    "description": b.description,
+                    "created_at": b.created_at,
+                }
+            )
+
             products = BidProduct.objects.filter(bid__pk=b.pk)
             for p in products:
-                b['products'].append({
-                    'id': p.pk,
-                    'name': p.product.name,
-                    'amount': p.amount
-                })
-        
-        
+                b["products"].append(
+                    {"id": p.pk, "name": p.product.name, "amount": p.amount}
+                )
+
         return Response(status=200, data=bid_arr)
-    
-    
-    
+
+
 class GetBidById(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        bid = Bid.objects.filter(pk=pk).first()
+
+        if not bid:
+            return Response(status=404, data={"error": "Zayavka topilmadi!"})
+
+        bid_obj = {
+            "id": bid.pk,
+            "object": bid.object.name,
+            "worker": bid.object.worker.name,
+            "phone": bid.object.worker.phone,
+            "status": bid.status,
+            "description": bid.description,
+            "created_at": bid.created_at,
+            "products": [],
+        }
+        products = BidProduct.objects.filter(bid__pk=bid.pk)
+        for p in products:
+            bid_obj["products"].append(
+                {
+                    "id": p.product.pk,
+                    "name": p.product.name,
+                    "amount": p.amount,
+                    "size": p.product.size,
+                }
+            )
+
+        return Response(status=200, data=bid_obj)
+
+
+class BidList(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        bid = Bid.objects.all()
+        bid_arr = []
+
+        for b in bid:
+            bid_arr.append(
+                {
+                    "id": b.pk,
+                    "status": b.status,
+                    "description": b.description,
+                    "created_at": b.created_at,
+                }
+            )
+
+            products = BidProduct.objects.filter(bid__pk=b.pk)
+            for p in products:
+                b["products"].append(
+                    {"id": p.pk, "name": p.product.name, "amount": p.amount}
+                )
+
+        return Response(status=200, data=bid_arr)
+
+
+class ComparisonBidById(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         bid = Bid.objects.filter(pk=pk).first()
-        
-        if not bid:
-            return Response(status=404, data={'error': "Zayavka topilmadi!"})
 
-        bid_obj = {
-            'id': bid.pk,
-            'object': bid.object.name,
-            'worker': bid.object.worker.name,
-            'phone': bid.object.worker.phone,
-            'status': bid.status,
-            'description': bid.description,
-            'created_at': bid.created_at,
-            'products': [],
-        }
-        products = BidProduct.objects.filter(bid__pk=bid.pk)
-        for p in products:
-            bid_obj['products'].append({
-                'id': p.product.pk,
-                'name': p.product.name,
-                'amount': p.amount,
-                'size': p.product.size,
-            })
-        
-        
-        return Response(status=200, data=bid_obj)
-    
-    
-    
-class BidList(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        bid = Bid.objects.all()
-        bid_arr = []
-        
-        for b in bid:
-            bid_arr.append({
-                'id': b.pk,
-                'status': b.status,
-                'description': b.description,
-                'created_at': b.created_at,
-            })
-        
-            products = BidProduct.objects.filter(bid__pk=b.pk)
+        if not bid:
+            return Response(status=404, data={"error": "Zayavka topilmadi!"})
+
+        bid_products = BidProduct.objects.filter(bid=bid.pk)
+        products_response = []
+
+        for bp in bid_products:
+            products = ProductBase.objects.filter(product__pk=bp.product.pk)
+            old_product = []
             for p in products:
-                b['products'].append({
-                    'id': p.pk,
-                    'name': p.product.name,
-                    'amount': p.amount
-                })
-        
-        
-        return Response(status=200, data=bid_arr)
+                if bp.amount <= p.amount:
+                    filtered_product = list(
+                        filter(lambda obj: obj["id"] == p.product.pk, products_response)
+                    )
+                    if not filtered_product:
+                        products_response.append(
+                            {
+                                "id": p.product.pk,
+                                "name": p.product.name,
+                                "amount": p.amount,
+                                "price": p.product.amount,
+                                "warehouse": {
+                                    "name": p.warehouse.name,
+                                    "address": p.warehouse.address,
+                                    "phone": p.warehouse.worker.phone,
+                                    "worker": p.warehouse.worker.name,
+                                },
+                            }
+                        )
+                else: 
+                    old_product.append(p)
+                    total_amount = sum([obj.amount for obj in old_product])
+                    for op in old_product:
+                        if bp.amount <= total_amount:
+                            products_response.append(
+                                {
+                                    "id": op.product.pk,
+                                    "name": op.product.name,
+                                    "amount": op.amount,
+                                    "price": op.product.amount,
+                                    "warehouse": {
+                                        "name": op.warehouse.name,
+                                        "address": op.warehouse.address,
+                                        "phone": op.warehouse.worker.phone,
+                                        "worker": op.warehouse.worker.name,
+                                    },
+                                }
+                            )
+                        
+                    
+                    
+        return Response(status=200, data=products_response)
