@@ -96,8 +96,8 @@ class BidMyList(APIView):
     
     
 class GetBidById(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         bid = Bid.objects.filter(pk=pk).first()
         
@@ -121,3 +121,31 @@ class GetBidById(APIView):
         
         
         return Response(status=200, data=bid_obj)
+    
+    
+    
+class BidList(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        bid = Bid.objects.all()
+        bid_arr = []
+        
+        for b in bid:
+            bid_arr.append({
+                'id': b.pk,
+                'status': b.status,
+                'description': b.description,
+                'created_at': b.created_at,
+            })
+        
+            products = BidProduct.objects.filter(bid__pk=b.pk)
+            for p in products:
+                b['products'].append({
+                    'id': p.pk,
+                    'name': p.product.name,
+                    'amount': p.amount
+                })
+        
+        
+        return Response(status=200, data=bid_arr)
