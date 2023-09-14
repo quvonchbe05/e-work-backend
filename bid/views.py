@@ -107,12 +107,13 @@ class GetBidById(APIView):
         bid_obj.append({
             'id': bid.pk,
             'status': bid.status,
-            'created_at': bid.created_at
+            'created_at': bid.created_at,
+            'products': [],
         })
         products = BidProduct.objects.filter(bid__pk=bid.pk)
         for p in products:
             bid_obj['products'].append({
-            'id': p.pk,
+                'id': p.product.pk,
                 'name': p.product.name,
                 'amount': p.amount
             })
