@@ -178,6 +178,7 @@ class ComparisonBidById(APIView):
                             {
                                 "id": p.product.pk,
                                 "name": p.product.name,
+                                "size": p.product.size,
                                 "amount": p.amount,
                                 "price": p.product.amount,
                                 "warehouse": {
@@ -197,6 +198,7 @@ class ComparisonBidById(APIView):
                                 {
                                     "id": op.product.pk,
                                     "name": op.product.name,
+                                    "size": op.product.size,
                                     "amount": op.amount,
                                     "price": op.product.amount,
                                     "warehouse": {
