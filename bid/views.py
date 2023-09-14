@@ -108,6 +108,7 @@ class GetBidById(APIView):
             'id': bid.pk,
             'object': bid.object.name,
             'worker': bid.object.worker.name,
+            'phone': bid.object.worker.phone,
             'status': bid.status,
             'description': bid.description,
             'created_at': bid.created_at,
@@ -118,7 +119,8 @@ class GetBidById(APIView):
             bid_obj['products'].append({
                 'id': p.product.pk,
                 'name': p.product.name,
-                'amount': p.amount
+                'amount': p.amount,
+                'size': p.product.size,
             })
         
         
