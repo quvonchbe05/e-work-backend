@@ -99,17 +99,16 @@ class GetBidById(APIView):
     # permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         bid = Bid.objects.filter(pk=pk).first()
-        bid_obj = []
         
         if not bid:
             return Response(status=404, data={'error': "Zayavka topilmadi!"})
 
-        bid_obj.append({
+        bid_obj = {
             'id': bid.pk,
             'status': bid.status,
             'created_at': bid.created_at,
             'products': [],
-        })
+        }
         products = BidProduct.objects.filter(bid__pk=bid.pk)
         for p in products:
             bid_obj['products'].append({
