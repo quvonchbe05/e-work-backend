@@ -78,6 +78,7 @@ class BidMyList(APIView):
             bid_arr.append({
                 'id': b.pk,
                 'status': b.status,
+                'description': b.description
                 'created_at': b.created_at
             })
         
@@ -106,6 +107,7 @@ class GetBidById(APIView):
         bid_obj = {
             'id': bid.pk,
             'status': bid.status,
+            'description': bid.description,
             'created_at': bid.created_at,
             'products': [],
         }
