@@ -95,13 +95,17 @@ class UserCreate(APIView):
         random_password = get_random_string(length=8)
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
-            new_user = CustomUser(
-                name=request.data['name'],
-                phone=request.data['phone'],
-                username = request.data['username'],
-                role = request.data['role'],
-                password = make_password(random_password),
-            )
+            old_user = CustomUser.objects.filter(username=request.data['username']).first()
+            if not old_user:
+                new_user = CustomUser(
+                    name=request.data['name'],
+                    phone=request.data['phone'],
+                    username = request.data['username'],
+                    role = request.data['role'],
+                    password = make_password(random_password),
+                )
+            else:
+                return Response(status=400, data={'error': "Bu foydalanuvchi mavjud!"})
             new_user.save()
             return Response(
                 status=201,
