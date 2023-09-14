@@ -106,6 +106,8 @@ class GetBidById(APIView):
 
         bid_obj = {
             'id': bid.pk,
+            'object': bid.object.name,
+            'worker': bid.object.worker.name,
             'status': bid.status,
             'description': bid.description,
             'created_at': bid.created_at,
