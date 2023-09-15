@@ -372,7 +372,7 @@ class CreateBidToWarehouse(APIView):
                         )
 
                     new_bid_product = BidProductToWarehouse(
-                        product=product, amount=p["amount"], bid=new_bid_to_warehouse
+                        product=product, amount=pr["amount"], bid=new_bid_to_warehouse
                     )
                     new_bid_product.save()
 
