@@ -14,5 +14,5 @@ urlpatterns = [
     path('view/<int:pk>', GetBidById.as_view()),
     path('list', BidList.as_view()),
     path('comparison/<int:pk>', ComparisonBidById.as_view()),
-    path('warehouse/to/<int:pk>', CreateBidToWarehouse.as_view()),
+    path('warehouse/to/', CreateBidToWarehouse.as_view()),
 ]

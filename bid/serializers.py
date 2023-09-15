@@ -21,5 +21,15 @@ class BidListSerializer(serializers.ModelSerializer):
         fields = ('status', 'created_at')
         
         
+class ProductForWarehouseSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    warehouse_id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+    class Meta:
+        ref_name = 'product_in_bid_for_create'
+        
 class BidToWarehouseSerializer(serializers.Serializer):
-    pass
+    object_id = serializers.IntegerField()
+    bid_id = serializers.IntegerField()
+    products = serializers.ListSerializer(child=ProductForWarehouseSerializer())
+    
