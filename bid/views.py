@@ -112,8 +112,8 @@ class GetBidById(APIView):
             return Response(status=404, data={"error": "Zayavka topilmadi!"})
 
         bid_obj = {
-            "id": bid.object.pk,
-            "bid_id": bid.pk,
+            "object_id": bid.object.pk,
+            "id": bid.pk,
             "object": bid.object.name,
             "worker": bid.object.worker.name,
             "phone": bid.object.worker.phone,
