@@ -362,7 +362,7 @@ class CreateBidToWarehouse(APIView):
 
             for pr in products_response:
                 if pr["warehouse"]["id"] == fpr["id"]:
-                    product = TemplateProduct.objects.filter(pk=p["product"]).first()
+                    product = TemplateProduct.objects.filter(pk=pr["id"]).first()
                     if not product:
                         return Response(
                             status=404,
