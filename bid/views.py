@@ -12,13 +12,12 @@ from rest_framework.response import Response
 from accounts.utils import decode_jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-import json
 
 
 # Create your views here.
 class CreateBidForM(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=BidCreateSerializer)
     def post(self, request):
@@ -94,8 +93,8 @@ class BidMyList(APIView):
 
 
 class GetBidById(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         bid = Bid.objects.filter(pk=pk).first()
@@ -128,8 +127,8 @@ class GetBidById(APIView):
 
 
 class BidList(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         bid = Bid.objects.all()
@@ -155,8 +154,8 @@ class BidList(APIView):
 
 
 class ComparisonBidById(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         bid = Bid.objects.filter(pk=pk).first()
@@ -280,9 +279,14 @@ class CreateBidToWarehouse(APIView):
                             )
 
         filtered_products_with_warehouse = list(
-            set(json.dumps(json_object['warehouse']) for json_object in products_response)
+            set(json_object['warehouse'] for json_object in products_response)
         )
         
+        
+        for fpr in filtered_products_with_warehouse:
+            for pr in products_response:
+                if pr['warehouse']['id'] == fpr['id']:
+                    print(pr)
         
         
 
