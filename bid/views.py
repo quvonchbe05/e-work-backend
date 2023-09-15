@@ -278,7 +278,7 @@ class CreateBidToWarehouse(APIView):
                     new_bid_product.save()
                     
                 
-                bid.status = False
+                bid.status = "tasdiqlandi"
                 bid.save()
 
         else:

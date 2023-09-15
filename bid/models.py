@@ -30,7 +30,7 @@ class BidProduct(models.Model):
 class BidToWarehouse(models.Model):
     object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='bidsToWarehouse')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='bidsToWarehouse')
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=244, default="yuborilgan")
     # description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
