@@ -83,6 +83,7 @@ class BidMyList(APIView):
                     "status": b.status,
                     "description": b.description,
                     "created_at": b.created_at,
+                    "products": [],
                 }
             )
 
@@ -357,15 +358,25 @@ class CreateBidToWarehouse(APIView):
             object = Object.objects.filter(pk=bid.object.pk).first()
             warehouse = Warehouse.objects.filter(pk=fpr["id"]).first()
             new_bid_to_warehouse = BidToWarehouse(object=object, warehouse=warehouse)
+            new_bid_to_warehouse.save()
 
             for pr in products_response:
                 if pr["warehouse"]["id"] == fpr["id"]:
-                    print(pr)
+                    product = TemplateProduct.objects.filter(pk=p["product"]).first()
+                    if not product:
+                        return Response(
+                            status=404,
+                            data={
+                                "error": f"{p['name']}`ning id`si notog'ri kiritildi va maxsulot topilmadi!"
+                            },
+                        )
+
+                    new_bid_product = BidProductToWarehouse(
+                        product=product, amount=p["amount"], bid=new_bid_to_warehouse
+                    )
+                    new_bid_product.save()
 
         return Response(
             status=200,
-            data=[
-                json.loads(json_object)
-                for json_object in filtered_products_with_warehouse
-            ],
+            data={"status": "success", "bid_id": new_bid_to_warehouse.pk},
         )
