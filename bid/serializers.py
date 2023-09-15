@@ -19,3 +19,7 @@ class BidListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bid
         fields = ('status', 'created_at')
+        
+        
+class BidToWarehouseSerializer(serializers.Serializer):
+    pass

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Bid, BidProduct
+from .models import Bid, BidProduct, BidToWarehouse, BidProductToWarehouse
 from .serializers import BidCreateSerializer, BidListSerializer
 from products.models import TemplateProduct
 from objects.models import Object
@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from accounts.utils import decode_jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+import json
 
 
 # Create your views here.
@@ -156,6 +157,7 @@ class BidList(APIView):
 class ComparisonBidById(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     def get(self, request, pk):
         bid = Bid.objects.filter(pk=pk).first()
 
@@ -182,6 +184,7 @@ class ComparisonBidById(APIView):
                                 "amount": p.amount,
                                 "price": p.product.amount,
                                 "warehouse": {
+                                    "id": p.warehouse.pk,
                                     "name": p.warehouse.name,
                                     "address": p.warehouse.address,
                                     "phone": p.warehouse.worker.phone,
@@ -189,7 +192,7 @@ class ComparisonBidById(APIView):
                                 },
                             }
                         )
-                else: 
+                else:
                     old_product.append(p)
                     total_amount = sum([obj.amount for obj in old_product])
                     for op in old_product:
@@ -202,6 +205,7 @@ class ComparisonBidById(APIView):
                                     "amount": op.amount,
                                     "price": op.product.amount,
                                     "warehouse": {
+                                        "id": op.warehouse.pk,
                                         "name": op.warehouse.name,
                                         "address": op.warehouse.address,
                                         "phone": op.warehouse.worker.phone,
@@ -209,7 +213,77 @@ class ComparisonBidById(APIView):
                                     },
                                 }
                             )
-                        
-                    
-                    
+
         return Response(status=200, data=products_response)
+
+
+class CreateBidToWarehouse(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        bid = Bid.objects.filter(pk=pk).first()
+
+        if not bid:
+            return Response(status=404, data={"error": "Zayavka topilmadi!"})
+
+        # new_bid_to_warehoue = BidToWarehouse(object=object, warehouse=request.data['warehouse'], description=request.data["description"])
+        # new_bid_to_warehoue.save()
+
+        bid_products = BidProduct.objects.filter(bid=bid.pk)
+        products_response = []
+
+        for bp in bid_products:
+            products = ProductBase.objects.filter(product__pk=bp.product.pk)
+            old_product = []
+            for p in products:
+                if bp.amount <= p.amount:
+                    filtered_product = list(
+                        filter(lambda obj: obj["id"] == p.product.pk, products_response)
+                    )
+                    if not filtered_product:
+                        products_response.append(
+                            {
+                                "id": p.product.pk,
+                                "name": p.product.name,
+                                "size": p.product.size,
+                                "amount": p.amount,
+                                "price": p.product.amount,
+                                "warehouse": {
+                                    "id": p.warehouse.pk,
+                                    "name": p.warehouse.name,
+                                    "address": p.warehouse.address,
+                                    "phone": p.warehouse.worker.phone,
+                                    "worker": p.warehouse.worker.name,
+                                },
+                            }
+                        )
+                else:
+                    old_product.append(p)
+                    total_amount = sum([obj.amount for obj in old_product])
+                    for op in old_product:
+                        if bp.amount <= total_amount:
+                            products_response.append(
+                                {
+                                    "id": op.product.pk,
+                                    "name": op.product.name,
+                                    "size": op.product.size,
+                                    "amount": op.amount,
+                                    "price": op.product.amount,
+                                    "warehouse": {
+                                        "id": op.warehouse.pk,
+                                        "name": op.warehouse.name,
+                                        "address": op.warehouse.address,
+                                        "phone": op.warehouse.worker.phone,
+                                        "worker": op.warehouse.worker.name,
+                                    },
+                                }
+                            )
+
+        filtered_products_with_warehouse = list(
+            set(json.dumps(json_object['warehouse']) for json_object in products_response)
+        )
+        
+        
+        
+
+        return Response(status=200, data=filtered_products_with_warehouse)
