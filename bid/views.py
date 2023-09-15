@@ -339,8 +339,9 @@ class CreateBidToWarehouse(APIView):
                 },
             },
         ]
+        
         filtered_products_with_warehouse = list(
-            set(json.dumps(json_object["warehouse"]) for json_object in test_response)
+            set(json.dumps(json_object["warehouse"]) for json_object in products_response)
         )
         
         fpwwj = [json.loads(json_object) for json_object in filtered_products_with_warehouse]
