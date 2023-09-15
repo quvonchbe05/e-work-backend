@@ -6,7 +6,7 @@ from warehouses.models import Warehouse
 # Create your models here.
 class Bid(models.Model):
     object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='bids')
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=244, default="yuborilgan")
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
