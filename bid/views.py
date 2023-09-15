@@ -5,6 +5,8 @@ from products.models import TemplateProduct
 from objects.models import Object
 from accounts.models import CustomUser
 from products.models import ProductBase
+from objects.models import Object
+from warehouses.models import Warehouse
 from rest_framework import generics
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
@@ -12,6 +14,7 @@ from rest_framework.response import Response
 from accounts.utils import decode_jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+import json
 
 
 # Create your views here.
@@ -278,16 +281,77 @@ class CreateBidToWarehouse(APIView):
                                 }
                             )
 
+        test_response = [
+            {
+                "id": 25,
+                "name": "Oxak",
+                "size": "kg",
+                "amount": 1400,
+                "price": 1,
+                "warehouse": {
+                    "id": 14,
+                    "name": "1-ombor",
+                    "address": "Chilonzor 12kv",
+                    "phone": "998908081791",
+                    "worker": "Shodiyor",
+                },
+            },
+            {
+                "id": 21,
+                "name": "Qum",
+                "size": "tonna",
+                "amount": 107,
+                "price": 1,
+                "warehouse": {
+                    "id": 16,
+                    "name": "3-ombor",
+                    "address": "Olmozor tumani 2kv",
+                    "phone": "998901292221",
+                    "worker": "Raximov Sanjar",
+                },
+            },
+            {
+                "id": 23,
+                "name": "Armatura",
+                "size": "metr",
+                "amount": 997,
+                "price": 1,
+                "warehouse": {
+                    "id": 14,
+                    "name": "1-ombor",
+                    "address": "Chilonzor 12kv",
+                    "phone": "998908081791",
+                    "worker": "Shodiyor",
+                },
+            },
+            {
+                "id": 23,
+                "name": "Armatura",
+                "size": "metr",
+                "amount": 971,
+                "price": 1,
+                "warehouse": {
+                    "id": 16,
+                    "name": "3-ombor",
+                    "address": "Olmozor tumani 2kv",
+                    "phone": "998901292221",
+                    "worker": "Raximov Sanjar",
+                },
+            },
+        ]
         filtered_products_with_warehouse = list(
-            set(json_object['warehouse'] for json_object in products_response)
+            set(json.dumps(json_object["warehouse"]) for json_object in test_response)
         )
         
-        
-        for fpr in filtered_products_with_warehouse:
-            for pr in products_response:
-                if pr['warehouse']['id'] == fpr['id']:
-                    print(pr)
-        
-        
+        fpwwj = [json.loads(json_object) for json_object in filtered_products_with_warehouse]
 
-        return Response(status=200, data=filtered_products_with_warehouse)
+        for fpr in fpwwj:
+            object = Object.objects.filter(pk=bid.object.pk).first()
+            warehouse = Warehouse.objects.filter(pk=fpr["id"]).first()
+            new_bid_to_warehouse = BidToWarehouse(object=object, warehouse=warehouse)
+
+            for pr in products_response:
+                if pr["warehouse"]["id"] == fpr["id"]:
+                    print(pr)
+
+        return Response(status=200, data=[json.loads(json_object) for json_object in filtered_products_with_warehouse])
