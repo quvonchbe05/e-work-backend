@@ -86,7 +86,8 @@ class BidMyList(APIView):
                 }
             )
 
-            products = BidProduct.objects.filter(bid__pk=b.pk)
+        for b in bid_arr:
+            products = BidProduct.objects.filter(bid__pk=b["id"])
             for p in products:
                 b["products"].append(
                     {"id": p.pk, "name": p.product.name, "amount": p.amount}
@@ -147,7 +148,8 @@ class BidList(APIView):
                 }
             )
 
-            products = BidProduct.objects.filter(bid__pk=b.pk)
+        for b in bid_arr:
+            products = BidProduct.objects.filter(bid__pk=b["id"])
             for p in products:
                 b["products"].append(
                     {"id": p.pk, "name": p.product.name, "amount": p.amount}
@@ -339,12 +341,17 @@ class CreateBidToWarehouse(APIView):
                 },
             },
         ]
-        
+
         filtered_products_with_warehouse = list(
-            set(json.dumps(json_object["warehouse"]) for json_object in products_response)
+            set(
+                json.dumps(json_object["warehouse"])
+                for json_object in products_response
+            )
         )
-        
-        fpwwj = [json.loads(json_object) for json_object in filtered_products_with_warehouse]
+
+        fpwwj = [
+            json.loads(json_object) for json_object in filtered_products_with_warehouse
+        ]
 
         for fpr in fpwwj:
             object = Object.objects.filter(pk=bid.object.pk).first()
@@ -355,4 +362,10 @@ class CreateBidToWarehouse(APIView):
                 if pr["warehouse"]["id"] == fpr["id"]:
                     print(pr)
 
-        return Response(status=200, data=[json.loads(json_object) for json_object in filtered_products_with_warehouse])
+        return Response(
+            status=200,
+            data=[
+                json.loads(json_object)
+                for json_object in filtered_products_with_warehouse
+            ],
+        )
