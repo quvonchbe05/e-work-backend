@@ -151,6 +151,7 @@ class BidList(APIView):
                     "status": b.status,
                     "description": b.description,
                     "created_at": b.created_at,
+                    "products": [],
                 }
             )
 
@@ -287,3 +288,6 @@ class CreateBidToWarehouse(APIView):
             status=200,
             data={"status": "success"},
         )
+
+
+
