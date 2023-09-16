@@ -291,3 +291,17 @@ class CreateBidToWarehouse(APIView):
 
 
 
+class CancelBid(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        bid = Bid.objects.filter(pk=pk).first()
+        if not bid:
+            return Response(status=404, data={'error': 'Zayavka topilmadi!'})
+        
+        
+        bid.status = 'qaytarildi'
+        bid.save()
+        
+        return Response(status=200, data={'status': 'success'})
