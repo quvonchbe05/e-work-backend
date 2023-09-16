@@ -152,6 +152,13 @@ class BidList(APIView):
                     "description": b.description,
                     "created_at": b.created_at,
                     "products": [],
+                    "object": {
+                        'id': b.object.pk,
+                        'name': b.object.name,
+                        'address': b.object.address,
+                        'phone': b.object.worker.phone,
+                        'worker': b.object.worker.name,
+                    }
                 }
             )
 
@@ -302,6 +309,34 @@ class CancelBid(APIView):
         
         
         bid.status = 'qaytarildi'
+        bid.save()
+        
+        return Response(status=200, data={'status': 'success'})
+    
+    
+    
+
+class ConfirmInWarehouse(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        bid = BidToWarehouse.objects.filter(pk=pk).first()
+        if not bid:
+            return Response(status=404, data={'error': 'Zayavka topilmadi!'})
+        
+        bid_products = BidProductToWarehouse.objects.filter(bid__id=bid.pk)
+        
+        for bp in bid_products:
+            base_product = ProductBase.objects.filter(pk=bp.product.pk, warehouse__id=bid.warehouse.pk).first()
+            if not base_product:
+                return Response(status=404, data={'error': 'Base product not found'})
+            
+            base_product.amount = base_product.amount-bp.amount
+            base_product.save()
+            
+            
+        bid.status = "tasdiqlandi"
         bid.save()
         
         return Response(status=200, data={'status': 'success'})
