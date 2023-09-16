@@ -321,7 +321,14 @@ class ConfirmInWarehouse(APIView):
     # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        bid = BidToWarehouse.objects.filter(pk=pk).first()
+        token = decode_jwt(request)
+        if not token:
+            return Response(status=404, data={"error": "invalid token"})
+        user = CustomUser.objects.filter(id=token["user_id"]).first()
+        if not user:
+            return Response(status=404, data={"error": "invalid token"})
+        
+        bid = BidToWarehouse.objects.filter(pk=pk, warehouse__worker__id=user.pk).first()
         if not bid:
             return Response(status=404, data={'error': 'Zayavka topilmadi!'})
         
@@ -340,3 +347,45 @@ class ConfirmInWarehouse(APIView):
         bid.save()
         
         return Response(status=200, data={'status': 'success'})
+    
+    
+class BidToWarehouseList(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        token = decode_jwt(request)
+        if not token:
+            return Response(status=404, data={"error": "invalid token"})
+        user = CustomUser.objects.filter(id=token["user_id"]).first()
+        if not user:
+            return Response(status=404, data={"error": "invalid token"})
+        
+        bid = BidToWarehouse.objects.filter(warehouse__worker__id=user.pk).first()
+        bid_arr = []
+
+        for b in bid:
+            bid_arr.append(
+                {
+                    "id": b.pk,
+                    "status": b.status,
+                    "created_at": b.created_at,
+                    "products": [],
+                    "object": {
+                        'id': b.object.pk,
+                        'name': b.object.name,
+                        'address': b.object.address,
+                        'phone': b.object.worker.phone,
+                        'worker': b.object.worker.name,
+                    }
+                }
+            )
+
+        for b in bid_arr:
+            products = BidProductToWarehouse.objects.filter(bid__pk=b["id"])
+            for p in products:
+                b["products"].append(
+                    {"id": p.pk, "name": p.product.name, "amount": p.amount}
+                )
+
+        return Response(status=200, data=bid_arr)

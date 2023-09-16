@@ -8,6 +8,7 @@ from .views import (
     CreateBidToWarehouse,
     CancelBid,
     ConfirmInWarehouse,
+    BidToWarehouseList,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path('warehouse/to/', CreateBidToWarehouse.as_view()),
     path('cancel/<int:pk>', CancelBid.as_view()),
     path('warehouse/confirm/<int:pk>', ConfirmInWarehouse.as_view()),
+    path('warehouse/history', BidToWarehouseList.as_view()),
 ]
