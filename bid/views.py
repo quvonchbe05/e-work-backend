@@ -314,8 +314,8 @@ class CreateBidToWarehouse(APIView):
                     object=object,
                     warehouse=warehouse,
                 )
-                ids.append(new_bid.pk)
                 new_bid.save()
+                ids.append(new_bid.pk)
 
                 request_products = list(
                     filter(lambda obj: obj["warehouse_id"] == id, products)
