@@ -298,7 +298,7 @@ class CreateBidToWarehouse(APIView):
             if not object:
                 return Response(status=404, data={"error": "Obyekt topilmadi"})
 
-            bid = Bid.objects.filter(pk=bid_id).first()
+            bid = Bid.objects.filter(pk=bid_id, status="yuborilgan").first()
             if not bid:
                 return Response(status=404, data={"error": "Zayavka topilmadi"})
 
