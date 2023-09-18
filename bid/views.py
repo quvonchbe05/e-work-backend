@@ -436,3 +436,5 @@ class BidToWarehouseList(APIView):
                 )
 
         return Response(status=200, data=bid_arr)
+
+# Salom
