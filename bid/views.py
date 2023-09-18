@@ -303,7 +303,7 @@ class CreateBidToWarehouse(APIView):
                 return Response(status=404, data={"error": "Zayavka topilmadi"})
 
             unique_warehouses = list(set(p["warehouse_id"] for p in products))
-            ids = []
+            response_ids = []
 
             for id in unique_warehouses:
                 warehouse = Warehouse.objects.filter(pk=id).first()
@@ -315,7 +315,10 @@ class CreateBidToWarehouse(APIView):
                     warehouse=warehouse,
                 )
                 new_bid.save()
-                ids.append(new_bid.pk)
+                response_ids.append({
+                    "bid_id": new_bid.pk,
+                    "warehouse_id": warehouse.pk
+                })
 
                 request_products = list(
                     filter(lambda obj: obj["warehouse_id"] == id, products)
@@ -343,7 +346,7 @@ class CreateBidToWarehouse(APIView):
 
         return Response(
             status=200,
-            data={"status": "success", 'ids': ids},
+            data={"status": "success", 'data': response_ids},
         )
 
 
