@@ -130,8 +130,56 @@ class GetBidById(APIView):
                     "name": p.product.name,
                     "amount": p.amount,
                     "size": p.product.size,
+                    "objects": [],
                 }
             )
+
+        for bp in bid_obj["products"]:
+            products = ProductBase.objects.filter(product__pk=bp['id'])
+            old_product = []
+            for p in products:
+                if bp['amount'] <= p.amount:
+                    filtered_product = list(
+                        filter(lambda obj: obj["id"] == p.product.pk, bp['objects'])
+                    )
+                    if not filtered_product:
+                        bp['objects'].append(
+                            {
+                                "id": p.product.pk,
+                                "name": p.product.name,
+                                "size": p.product.size,
+                                "amount": p.amount,
+                                "price": p.product.amount,
+                                "warehouse": {
+                                    "id": p.warehouse.pk,
+                                    "name": p.warehouse.name,
+                                    "address": p.warehouse.address,
+                                    "phone": p.warehouse.worker.phone,
+                                    "worker": p.warehouse.worker.name,
+                                },
+                            }
+                        )
+                else:
+                    old_product.append(p)
+                    total_amount = sum([obj.amount for obj in old_product])
+                    for op in old_product:
+                        if bp['amount'] <= total_amount:
+                            bp['objects'].append(
+                                {
+                                    "id": op.product.pk,
+                                    "name": op.product.name,
+                                    "size": op.product.size,
+                                    "amount": op.amount,
+                                    "price": op.product.amount,
+                                    "warehouse": {
+                                        "id": op.warehouse.pk,
+                                        "name": op.warehouse.name,
+                                        "address": op.warehouse.address,
+                                        "phone": op.warehouse.worker.phone,
+                                        "worker": op.warehouse.worker.name,
+                                    },
+                                }
+                            )
 
         return Response(status=200, data=bid_obj)
 
@@ -153,12 +201,12 @@ class BidList(APIView):
                     "created_at": b.created_at,
                     "products": [],
                     "object": {
-                        'id': b.object.pk,
-                        'name': b.object.name,
-                        'address': b.object.address,
-                        'phone': b.object.worker.phone,
-                        'worker': b.object.worker.name,
-                    }
+                        "id": b.object.pk,
+                        "name": b.object.name,
+                        "address": b.object.address,
+                        "phone": b.object.worker.phone,
+                        "worker": b.object.worker.name,
+                    },
                 }
             )
 
@@ -256,7 +304,6 @@ class CreateBidToWarehouse(APIView):
 
             unique_warehouses = list(set(p["warehouse_id"] for p in products))
 
-            
             for id in unique_warehouses:
                 warehouse = Warehouse.objects.filter(pk=id).first()
                 if not warehouse:
@@ -273,18 +320,19 @@ class CreateBidToWarehouse(APIView):
                     filter(lambda obj: obj["warehouse_id"] == id, products)
                 )
                 for p in request_products:
-                    base_product = ProductBase.objects.filter(pk=p['product_id']).first()
+                    base_product = ProductBase.objects.filter(
+                        pk=p["product_id"]
+                    ).first()
                     if not base_product:
                         return Response(status=404, data={"error": "Produkt topilmadi"})
-                    
+
                     new_bid_product = BidProductToWarehouse(
                         product=base_product,
-                        amount=p['amount'],
+                        amount=p["amount"],
                         bid=new_bid,
                     )
                     new_bid_product.save()
-                    
-                
+
                 bid.status = "tasdiqlandi"
                 bid.save()
 
@@ -297,7 +345,6 @@ class CreateBidToWarehouse(APIView):
         )
 
 
-
 class CancelBid(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
@@ -305,16 +352,13 @@ class CancelBid(APIView):
     def get(self, request, pk):
         bid = Bid.objects.filter(pk=pk).first()
         if not bid:
-            return Response(status=404, data={'error': 'Zayavka topilmadi!'})
-        
-        
-        bid.status = 'qaytarildi'
+            return Response(status=404, data={"error": "Zayavka topilmadi!"})
+
+        bid.status = "qaytarildi"
         bid.save()
-        
-        return Response(status=200, data={'status': 'success'})
-    
-    
-    
+
+        return Response(status=200, data={"status": "success"})
+
 
 class ConfirmInWarehouse(APIView):
     # authentication_classes = [JWTAuthentication]
@@ -327,28 +371,31 @@ class ConfirmInWarehouse(APIView):
         user = CustomUser.objects.filter(id=token["user_id"]).first()
         if not user:
             return Response(status=404, data={"error": "invalid token"})
-        
-        bid = BidToWarehouse.objects.filter(pk=pk, warehouse__worker__id=user.pk).first()
+
+        bid = BidToWarehouse.objects.filter(
+            pk=pk, warehouse__worker__id=user.pk
+        ).first()
         if not bid:
-            return Response(status=404, data={'error': 'Zayavka topilmadi!'})
-        
+            return Response(status=404, data={"error": "Zayavka topilmadi!"})
+
         bid_products = BidProductToWarehouse.objects.filter(bid__id=bid.pk)
-        
+
         for bp in bid_products:
-            base_product = ProductBase.objects.filter(pk=bp.product.pk, warehouse__id=bid.warehouse.pk).first()
+            base_product = ProductBase.objects.filter(
+                pk=bp.product.pk, warehouse__id=bid.warehouse.pk
+            ).first()
             if not base_product:
-                return Response(status=404, data={'error': 'Base product not found'})
-            
-            base_product.amount = base_product.amount-bp.amount
+                return Response(status=404, data={"error": "Base product not found"})
+
+            base_product.amount = base_product.amount - bp.amount
             base_product.save()
-            
-            
+
         bid.status = "tasdiqlandi"
         bid.save()
-        
-        return Response(status=200, data={'status': 'success'})
-    
-    
+
+        return Response(status=200, data={"status": "success"})
+
+
 class BidToWarehouseList(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
@@ -360,7 +407,7 @@ class BidToWarehouseList(APIView):
         user = CustomUser.objects.filter(id=token["user_id"]).first()
         if not user:
             return Response(status=404, data={"error": "invalid token"})
-        
+
         bid = BidToWarehouse.objects.filter(warehouse__worker__id=user.pk).first()
         bid_arr = []
 
@@ -372,12 +419,12 @@ class BidToWarehouseList(APIView):
                     "created_at": b.created_at,
                     "products": [],
                     "object": {
-                        'id': b.object.pk,
-                        'name': b.object.name,
-                        'address': b.object.address,
-                        'phone': b.object.worker.phone,
-                        'worker': b.object.worker.name,
-                    }
+                        "id": b.object.pk,
+                        "name": b.object.name,
+                        "address": b.object.address,
+                        "phone": b.object.worker.phone,
+                        "worker": b.object.worker.name,
+                    },
                 }
             )
 
