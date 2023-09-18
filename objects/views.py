@@ -79,6 +79,7 @@ class ObjectDetail(APIView):
                     "status": b.status,
                     "description": b.description,
                     "created_at": b.created_at,
+                    "total_summa": 0,
                     "products": [],
                 }
             )
@@ -86,6 +87,7 @@ class ObjectDetail(APIView):
         for b in obj_json['bids']:
             products = BidProduct.objects.filter(bid__pk=b["id"])
             for p in products:
+                b['total_summa'] = p.amount*int(p.product.price)
                 b["products"].append(
                     {"id": p.pk, "name": p.product.name, "amount": p.amount, 'size': p.product.size}
                 )
