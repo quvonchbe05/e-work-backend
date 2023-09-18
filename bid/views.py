@@ -458,7 +458,6 @@ class GetWarehouseBidById(APIView):
             "worker": bid.object.worker.name,
             "phone": bid.object.worker.phone,
             "status": bid.status,
-            "description": bid.description,
             "created_at": bid.created_at,
             "products": [],
         }
