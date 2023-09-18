@@ -309,6 +309,7 @@ class CreateBidToWarehouse(APIView):
                 warehouse = Warehouse.objects.filter(pk=id).first()
                 if not warehouse:
                     return Response(status=404, data={"error": "Sklad topilmadi"})
+                
                 new_bid = BidToWarehouse(
                     object=object,
                     warehouse=warehouse,
@@ -319,8 +320,9 @@ class CreateBidToWarehouse(APIView):
                 request_products = list(
                     filter(lambda obj: obj["warehouse_id"] == id, products)
                 )
+                
                 for p in request_products:
-                    base_product = ProductBase.objects.filter(
+                    base_product = TemplateProduct.objects.filter(
                         pk=p["product_id"]
                     ).first()
                     if not base_product:
@@ -437,3 +439,39 @@ class BidToWarehouseList(APIView):
 
         return Response(status=200, data=bid_arr)
 
+
+
+class GetWarehouseBidById(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        bid = BidToWarehouse.objects.filter(pk=pk).first()
+
+        if not bid:
+            return Response(status=404, data={"error": "Zayavka topilmadi!"})
+
+        bid_obj = {
+            "object_id": bid.object.pk,
+            "id": bid.pk,
+            "object": bid.object.name,
+            "worker": bid.object.worker.name,
+            "phone": bid.object.worker.phone,
+            "status": bid.status,
+            "description": bid.description,
+            "created_at": bid.created_at,
+            "products": [],
+        }
+        products = BidProductToWarehouse.objects.filter(bid__pk=bid.pk)
+        for p in products:
+            bid_obj["products"].append(
+                {
+                    "id": p.product.pk,
+                    "name": p.product.name,
+                    "amount": p.amount,
+                    "size": p.product.size,
+                }
+            )
+
+       
+        return Response(status=200, data=bid_obj)
