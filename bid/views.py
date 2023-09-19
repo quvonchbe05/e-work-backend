@@ -455,7 +455,7 @@ class BidToWarehouseList(APIView):
             products = BidProductToWarehouse.objects.filter(bid__pk=b["id"])
             for p in products:
                 b["products"].append(
-                    {"id": p.pk, "name": p.product.name, "amount": p.amount}
+                    {"id": p.pk, "name": p.product.name, "amount": p.amount, 'size': p.product.size}
                 )
 
         return Response(status=200, data=bid_arr)
