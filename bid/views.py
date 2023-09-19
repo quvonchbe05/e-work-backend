@@ -379,7 +379,7 @@ class ConfirmInWarehouse(APIView):
             return Response(status=404, data={"error": "invalid token"})
 
         bid = BidToWarehouse.objects.filter(
-            pk=pk, warehouse__worker__id=user.pk
+            pk=pk, warehouse__worker=user
         ).first()
         if not bid:
             return Response(status=404, data={"error": "Zayavka topilmadi!"})
@@ -393,7 +393,7 @@ class ConfirmInWarehouse(APIView):
                 pk=bp.product.pk, warehouse__id=bid.warehouse.pk
             ).first()
             if not base_product:
-                return Response(status=404, data={"error": f"{bp.pk} Base product not found"})
+                return Response(status=404, data={"error": f"{bp.product.name} Base product not found"})
 
             base_product.amount = base_product.amount - bp.amount
             base_product.save()
