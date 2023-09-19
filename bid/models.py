@@ -57,6 +57,9 @@ class ObjectProducts(models.Model):
     price = models.CharField(max_length=155, null=True, blank=True)
     total_price = models.CharField(max_length=255, null=True, blank=True)
     
+    object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='object_products', null=True, blank=True)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='object_products', null=True, blank=True)
+    
     bid = models.ForeignKey(Bid, on_delete=models.CASCADE, related_name='object_products')
     
     created_at = models.DateTimeField(auto_now_add=True)

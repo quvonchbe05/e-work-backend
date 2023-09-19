@@ -404,7 +404,9 @@ class ConfirmInWarehouse(APIView):
                 price=base_product.product.price,
                 total_price=int(base_product.product.price)*bp.amount,
                 size=base_product.product.size,
-                bid=base_bid
+                bid=base_bid,
+                warehouse=base_product.warehouse,
+                object=bid.object,
             )
             new_object_product.save()
             
@@ -491,3 +493,31 @@ class GetWarehouseBidById(APIView):
 
        
         return Response(status=200, data=bid_obj)
+    
+    
+class ObjectProductsList(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        products = ObjectProducts.objects.filter(object__pk=pk)
+        
+        response = []
+        
+        for p in products:
+            response.append({
+                'id':p.pk,
+                'name':p.name,
+                'amount':p.amount,
+                'size':p.size,
+                'price':p.price,
+                'total_price':p.total_price,
+                'created_at':p.created_at,
+                'warhouse':{
+                    'id':p.warehouse.pk,
+                    'name':p.warehouse.name,
+                    'address':p.warehouse.address,
+                    'worker':p.warehouse.worker.name,
+                    'phone':p.warehouse.worker.phone,
+                }
+            })
+        return Response(status=200, data=response)
