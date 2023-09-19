@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Bid, BidProduct, BidToWarehouse, BidProductToWarehouse
+from .models import Bid, BidProduct, BidToWarehouse, BidProductToWarehouse, ObjectProducts
 from .serializers import (
     BidCreateSerializer,
     BidListSerializer,
@@ -313,6 +313,7 @@ class CreateBidToWarehouse(APIView):
                 new_bid = BidToWarehouse(
                     object=object,
                     warehouse=warehouse,
+                    bid=bid
                 )
                 new_bid.save()
                 response_ids.append({
@@ -382,6 +383,8 @@ class ConfirmInWarehouse(APIView):
         ).first()
         if not bid:
             return Response(status=404, data={"error": "Zayavka topilmadi!"})
+        
+        base_bid = Bid.objects.filter(pk=bid.bid.pk).first()
 
         bid_products = BidProductToWarehouse.objects.filter(bid__id=bid.pk)
 
@@ -394,6 +397,17 @@ class ConfirmInWarehouse(APIView):
 
             base_product.amount = base_product.amount - bp.amount
             base_product.save()
+            
+            new_object_product = ObjectProducts(
+                name=base_product.product.name,
+                amount=bp.amount,
+                price=base_product.product.price,
+                total_price=int(base_product.product.price)*bp.amount,
+                size=base_product.product.size,
+                bid=base_bid
+            )
+            new_object_product.save()
+            
 
         bid.status = "tasdiqlandi"
         bid.save()
