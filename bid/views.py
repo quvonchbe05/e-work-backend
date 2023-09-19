@@ -429,7 +429,7 @@ class BidToWarehouseList(APIView):
         if not user:
             return Response(status=404, data={"error": "invalid token"})
 
-        bid = BidToWarehouse.objects.filter(warehouse__worker__pk=user.pk)
+        bid = BidToWarehouse.objects.filter(warehouse__worker=user)
         if not bid:
             return Response(status=404, data={"error": "Zayavka topilmadi"})
         bid_arr = []
