@@ -19,6 +19,7 @@ from accounts.utils import decode_jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 import json
+from products.models import Product, Delivery
 
 
 # Create your views here.
@@ -387,6 +388,14 @@ class ConfirmInWarehouse(APIView):
         base_bid = Bid.objects.filter(pk=bid.bid.pk).first()
 
         bid_products = BidProductToWarehouse.objects.filter(bid__id=bid.pk)
+        
+        new_delivery = Delivery(
+            name=bid.object.name,
+            phone=bid.object.worker.phone,
+            status=False,
+        )
+
+        new_delivery.save()
 
         for bp in bid_products:
             base_product = ProductBase.objects.filter(
@@ -397,6 +406,17 @@ class ConfirmInWarehouse(APIView):
 
             base_product.amount = base_product.amount - bp.amount
             base_product.save()
+            
+            new_product = Product(
+                product=bp.product,
+                amount=bp.amount,
+                description="",
+                delivery=new_delivery,
+                warehouse=bid.warehouse,
+                total_price=int(bp.product.price)
+                * bp.amount,
+            )
+            new_product.save()
             
             new_object_product = ObjectProducts(
                 name=base_product.product.name,
