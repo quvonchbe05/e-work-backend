@@ -473,15 +473,15 @@ class Monitoring(APIView):
         object_res = []
         for obj in objects:
             if request.data["date_id"] == "1":
-                object_products = ObjectProducts.objects.filter(product__id__icontains=product_id, object__pk__icontains=obj.pk, created_at__icontains=today)
+                object_products = ObjectProducts.objects.filter(object__pk__icontains=obj.pk, created_at__icontains=today)
             elif request.data["date_id"] == "1":
-                object_products = ObjectProducts.objects.filter(product__id__icontains=product_id, object__pk__icontains=obj.pk, created_at__icontains=yesterday)
+                object_products = ObjectProducts.objects.filter(object__pk__icontains=obj.pk, created_at__icontains=yesterday)
             elif request.data["date_id"] == "1":
-                object_products = ObjectProducts.objects.filter(product__id__icontains=product_id, object__pk__icontains=obj.pk, created_at__range=(seven_days_ago, tomorrow))
+                object_products = ObjectProducts.objects.filter(object__pk__icontains=obj.pk, created_at__range=(seven_days_ago, tomorrow))
             elif request.data["date_id"] == "4":
-                object_products = ObjectProducts.objects.filter(product__id__icontains=product_id, object__pk__icontains=obj.pk, created_at__icontains=month)
+                object_products = ObjectProducts.objects.filter(object__pk__icontains=obj.pk, created_at__icontains=month)
             else:
-                object_products = ObjectProducts.objects.filter(product__id__icontains=product_id, object__pk__icontains=obj.pk) 
+                object_products = ObjectProducts.objects.filter(object__pk__icontains=obj.pk) 
                 
             p_summa = 0
             
