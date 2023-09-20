@@ -65,6 +65,7 @@ class ProductTemplateHistorySerializer(serializers.ModelSerializer):
 class MonitoringSerializer(serializers.Serializer):
     date_id = serializers.CharField()
     warehouse_id = serializers.CharField()
+    object_id = serializers.CharField()
     product_id = serializers.CharField()
     status = serializers.BooleanField()
 

@@ -23,6 +23,8 @@ from accounts.utils import decode_jwt
 from datetime import datetime, date, timedelta
 from warehouses.models import Warehouse
 from django.db.models.aggregates import Sum
+from objects.models import Object
+from bid.models import ObjectProducts
 
 
 # Create your views here.
@@ -386,8 +388,8 @@ class PRoductTemplateDelete(APIView):
 
 
 class Monitoring(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=MonitoringSerializer)
     def post(self, request):
@@ -411,6 +413,13 @@ class Monitoring(APIView):
             product_id = request.data["product_id"]
         else:
             product_id = ""
+            
+            
+        object_id = None
+        if request.data["object_id"] != "all":
+            object_id = request.data["object_id"]
+        else:
+            object_id = ""
 
         status = None
         if request.data["status"] != "all":
@@ -459,6 +468,25 @@ class Monitoring(APIView):
         products_arr = []
         kelgan_summa = 0
         ketgan_summa = 0
+        
+        objects = Object.objects.filter(pk__icontains=object_id)
+        object_res = []
+        for obj in objects:
+            object_products = ObjectProducts.objects.filter(object__pk__icontains=obj.pk)
+            p_summa = 0
+            
+            for p in object_products:
+                p_summa += int(p.total_price)
+            
+            object_res.append({
+                'name': obj.name,
+                'summa': p_summa,
+                'product_amount': len(object_products)
+            })
+            
+        
+        
+        
 
         for product in products:
             if product.delivery.status == True:
@@ -493,6 +521,7 @@ class Monitoring(APIView):
             status=200,
             data={
                 "products": products_arr,
+                'objects': object_res,
                 "kelgan_summa": kelgan_summa,
                 "ketgan_summa": ketgan_summa,
             },
