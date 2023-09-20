@@ -412,7 +412,7 @@ class ConfirmInWarehouse(APIView):
             if object_product_base:
                 object_product_base.amount += bp.amount
                 object_product_base.total_price = (
-                    int(base_product.product.price) * object_product_base.amoun
+                    int(base_product.product.price) * object_product_base.amount
                 )
                 object_product_base.save()
             else:
