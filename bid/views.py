@@ -416,7 +416,7 @@ class ConfirmInWarehouse(APIView):
                 )
                 object_product_base.save()
             else:
-                new_product_base = ProductBase(
+                new_product_base = ObjectProductBase(
                     product=base_product.product,
                     amount=bp.amount,
                     object=bid.object,
