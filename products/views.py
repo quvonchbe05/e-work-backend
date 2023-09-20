@@ -431,6 +431,7 @@ class Monitoring(APIView):
             status = ""
 
         if request.data["date_id"] == "1":
+            objects = Object.objects.filter(pk__icontains=object_id, created_at__icontains=today)
             products = Product.objects.filter(
                 created_at__icontains=today,
                 warehouse__id__icontains=warehouse_id,
@@ -438,6 +439,7 @@ class Monitoring(APIView):
                 delivery__status__icontains=status,
             )
         elif request.data["date_id"] == "2":
+            objects = Object.objects.filter(pk__icontains=object_id, created_at__icontains=yesterday)
             products = Product.objects.filter(
                 created_at__icontains=yesterday,
                 warehouse__id__icontains=warehouse_id,
@@ -445,6 +447,7 @@ class Monitoring(APIView):
                 delivery__status__icontains=status,
             )
         elif request.data["date_id"] == "3":
+            objects = Object.objects.filter(pk__icontains=object_id, created_at__range=(seven_days_ago, tomorrow))
             products = Product.objects.filter(
                 created_at__range=(seven_days_ago, tomorrow),
                 warehouse__id__icontains=warehouse_id,
@@ -452,6 +455,7 @@ class Monitoring(APIView):
                 delivery__status__icontains=status,
             )
         elif request.data["date_id"] == "4":
+            objects = Object.objects.filter(pk__icontains=object_id, created_at__icontains=month)
             products = Product.objects.filter(
                 created_at__icontains=month,
                 warehouse__id__icontains=warehouse_id,
@@ -459,6 +463,7 @@ class Monitoring(APIView):
                 delivery__status__icontains=status,
             )
         else:
+            objects = Object.objects.filter(pk__icontains=object_id)
             products = Product.objects.filter(
                 warehouse__id__icontains=warehouse_id,
                 product__id__icontains=product_id,
@@ -469,7 +474,7 @@ class Monitoring(APIView):
         kelgan_summa = 0
         ketgan_summa = 0
         
-        objects = Object.objects.filter(pk__icontains=object_id)
+
         object_res = []
         for obj in objects:
             object_products = ObjectProducts.objects.filter(object__pk__icontains=obj.pk)
