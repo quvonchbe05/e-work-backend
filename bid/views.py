@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Bid, BidProduct, BidToWarehouse, BidProductToWarehouse, ObjectProducts
+from .models import Bid, BidProduct, BidToWarehouse, BidProductToWarehouse, ObjectProducts, ObjectProductBase
 from .serializers import (
     BidCreateSerializer,
     BidListSerializer,
@@ -406,6 +406,23 @@ class ConfirmInWarehouse(APIView):
 
             base_product.amount = base_product.amount - bp.amount
             base_product.save()
+            
+            object_product_base = ObjectProductBase.objects.filter(object=bid.object, product=base_product.product).first()
+
+            if object_product_base:
+                object_product_base.amount += bp.amount
+                object_product_base.total_price = (
+                    int(base_product.product.price) * object_product_base.amoun
+                )
+                object_product_base.save()
+            else:
+                new_product_base = ProductBase(
+                    product=base_product.product,
+                    amount=bp.amount,
+                    object=bid.object,
+                    total_price=int(base_product.product.price) * bp.amount
+                )
+                new_product_base.save()
             
             new_product = Product(
                 product=bp.product,

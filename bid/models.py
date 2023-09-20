@@ -48,7 +48,18 @@ class BidProductToWarehouse(models.Model):
     def __str__(self) -> str:
         return str(self.product.name)
 
-
+class ObjectProductBase(models.Model):
+    product = models.ForeignKey(TemplateProduct, on_delete=models.CASCADE, related_name='object_products_base', null=True)
+    amount = models.IntegerField(default=0)
+    total_price = models.CharField(max_length=255, null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    object = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='object_products_base', null=True, blank=True)
+    
+    def __str__(self) -> str:
+        return f"{self.product.name}"
 
 class ObjectProducts(models.Model):
     name = models.CharField(max_length=255)
