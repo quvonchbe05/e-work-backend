@@ -623,8 +623,9 @@ class MonitoringChart(APIView):
                 )
 
             pr = len(products) * 100
-            foiz = round(pr / len(all_products))
-            datasets.append(foiz)
+            if len(all_products) != 0:
+                foiz = round(pr / len(all_products))
+                datasets.append(foiz)
 
         return Response(
             status=200,
