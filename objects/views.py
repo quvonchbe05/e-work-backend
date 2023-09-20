@@ -5,7 +5,7 @@ from .serializers import ObjectSerializer, ObjectListSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.views import APIView
-from bid.models import Bid, BidProduct
+from bid.models import Bid, BidProduct, ObjectProductBase
 from rest_framework.response import Response
 
 # Create your views here.
@@ -57,6 +57,8 @@ class ObjectDetail(APIView):
         if not object:
             return Response(status=404, data={'error': 'Obyekt topilmadi'})
         
+        products = ObjectProductBase.objects.filter(object=object)
+        
         obj_json = {
             'id': object.pk,
             'name': object.name,
@@ -66,11 +68,25 @@ class ObjectDetail(APIView):
                 'name': object.worker.name,
                 'phone': object.worker.phone,
             },
-            'bids': []
+            'bids': [],
+            'products': [],
         }
+        
+        for p in products:
+            obj_json['products'].append(
+                {
+                    "id": p.product.pk,
+                    "name": p.product.name,
+                    "price": p.product.price,
+                    "total_price": p.total_price,
+                    "amount": p.amount,
+                    "created_at": p.created_at
+                }
+            )
         
         bid = Bid.objects.filter(object__pk=object.pk)
         bid_arr = []
+        
 
         for b in bid:
             obj_json['bids'].append(
