@@ -579,7 +579,7 @@ class MonitoringChart(APIView):
         labels = []
 
         for w in warehouses:
-            labels.append(w.name)
+            
             if request.data["date_id"] == "1":
                 all_products = Product.objects.filter(created_at__icontains=today)
                 products = Product.objects.filter(
@@ -624,6 +624,7 @@ class MonitoringChart(APIView):
 
             pr = len(products) * 100
             if len(all_products) != 0:
+                labels.append(w.name)
                 foiz = round(pr / len(all_products))
                 datasets.append(foiz)
 
