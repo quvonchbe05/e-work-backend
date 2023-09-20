@@ -390,7 +390,7 @@ class ConfirmInWarehouse(APIView):
 
         for bp in bid_products:
             base_product = ProductBase.objects.filter(
-                pk=bp.product.pk, warehouse__pk=bid.warehouse.pk
+                product__pk=bp.product.pk, warehouse__pk=bid.warehouse.pk
             ).first()
             if not base_product:
                 return Response(status=404, data={"error": f"{bp.product.name} Base product not found"})
