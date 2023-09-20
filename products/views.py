@@ -409,9 +409,10 @@ class Monitoring(APIView):
             warehouse_id = ""
 
         product_id = None
+        template_product = None
         if request.data["product_id"] != "all":
             product_id = request.data["product_id"]
-            template_product = TemplateProduct.objects.filter(pk=product_id).first()
+            template_product = TemplateProduct.objects.filter(pk=int(product_id)).first()
         else:
             product_id = ""
             
