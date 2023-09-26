@@ -110,6 +110,7 @@ class UserCreate(APIView):
             return Response(
                 status=201,
                 data={
+                    'id': new_user.pk,
                     'name':new_user.name,
                     'phone':new_user.phone,
                     'username':new_user.username,
