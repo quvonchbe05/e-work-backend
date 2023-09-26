@@ -1,8 +1,9 @@
-from django.shortcuts import render
-from rest_framework import generics
-from .models import Driver
-from .seralizers import DriverSerializer
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework import viewsets
 
-# Create your views here.
+from .models import Car
+from .seralizers import CarSerializer
+
+
+class CarViewSet(viewsets.ModelViewSet):
+    queryset = Car.objects.all()
+    serializer_class = CarSerializer
