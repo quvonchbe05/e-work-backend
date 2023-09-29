@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Product, Delivery, TemplateProduct
-import json
+
 from warehouses.models import Warehouse
 from warehouses.serializers import UserForWarehouseSerializer
+from .models import Delivery, TemplateProduct
 
 
 class ProductSerializer(serializers.Serializer):
@@ -39,7 +39,7 @@ class ProductTemplateEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = TemplateProduct
         fields = ("name", "amount", "size", "price")
-        
+
 
 class ProductTemplateHistorySerializer(serializers.ModelSerializer):
     products_base = serializers.SerializerMethodField()
@@ -51,12 +51,13 @@ class ProductTemplateHistorySerializer(serializers.ModelSerializer):
                 "amount": p.amount,
                 "total_price": p.total_price,
                 "warehouse": {
-                    "name": p.warehouse.name,    
+                    "name": p.warehouse.name,
                     "address": p.warehouse.address
                 },
             }
             for p in obj.products_base.all()
         ]
+
     class Meta:
         model = TemplateProduct
         fields = ("name", "size", "price", "products_base")
@@ -97,3 +98,12 @@ class WarehousesMonitoringSerializer(serializers.ModelSerializer):
     class Meta:
         model = Warehouse
         fields = ("id", "name", "address", "worker", "products")
+
+
+class CreateProductSetSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    total_price = serializers.FloatField()
+    data_array = serializers.ListField()
+    object = serializers.IntegerField()
+
+

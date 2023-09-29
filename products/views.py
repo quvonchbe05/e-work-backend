@@ -1,30 +1,26 @@
-from django.shortcuts import render, get_object_or_404, get_list_or_404
-from accounts.models import CustomUser
-from .models import Product, Delivery, TemplateProduct, ProductBase
-from warehouses.models import Warehouse
-from rest_framework import generics
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from datetime import datetime, date, timedelta
+
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from accounts.models import CustomUser
+from accounts.utils import decode_jwt
+from bid.models import ObjectProducts
+from objects.models import Object
+from warehouses.models import Warehouse
+from .models import Product, Delivery, TemplateProduct, ProductBase, ProductSet
 from .serializers import (
     OrderSerializer,
-    ProductSerializer,
-    DeliverySerializer,
     ProductListSerializer,
     ProductFirstCreateSerializer,
     ProductTemplateEditSerializer,
     MonitoringSerializer,
     WarehousesMonitoringSerializer,
-    ProductTemplateHistorySerializer,
-)
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated
-from accounts.utils import decode_jwt
-from datetime import datetime, date, timedelta
-from warehouses.models import Warehouse
-from django.db.models.aggregates import Sum
-from objects.models import Object
-from bid.models import ObjectProducts
+    ProductTemplateHistorySerializer, CreateProductSetSerializer, )
 
 
 # Create your views here.
@@ -67,7 +63,7 @@ class ProductSAdminEdit(APIView):
                             if product_base:
                                 product_base.amount += product["amount"]
                                 product_base.total_price = (
-                                    int(template_product.price) * product_base.amount
+                                        int(template_product.price) * product_base.amount
                                 )
                                 product_base.save()
 
@@ -77,7 +73,7 @@ class ProductSAdminEdit(APIView):
                                     amount=product["amount"],
                                     warehouse=warehouse,
                                     total_price=int(template_product.price)
-                                    * product["amount"],
+                                                * product["amount"],
                                 )
                                 new_product_base.save()
 
@@ -88,7 +84,7 @@ class ProductSAdminEdit(APIView):
                                 delivery=new_delivery,
                                 warehouse=warehouse,
                                 total_price=int(template_product.price)
-                                * product["amount"],
+                                            * product["amount"],
                             )
 
                             new_product.save()
@@ -278,10 +274,10 @@ class ProductOutgoing(APIView):
                         if warehouse:
                             if old_product.amount > product["amount"]:
                                 old_product.amount = (
-                                    old_product.amount - product["amount"]
+                                        old_product.amount - product["amount"]
                                 )
                                 old_product.total_price = (
-                                    int(template_product.price) * old_product.amount
+                                        int(template_product.price) * old_product.amount
                                 )
                                 old_product.save()
 
@@ -292,7 +288,7 @@ class ProductOutgoing(APIView):
                                     delivery=new_delivery,
                                     warehouse=warehouse,
                                     total_price=int(template_product.price)
-                                    * product["amount"],
+                                                * product["amount"],
                                 )
                                 new_product.save()
 
@@ -359,6 +355,7 @@ class ProductTemplateEdit(generics.UpdateAPIView):
 class ProductTemplateHistory(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     # queryset = TemplateProduct.objects.filter(status=True)
     # serializer_class = ProductTemplateHistorySerializer
     def get(self, request, pk):
@@ -368,6 +365,7 @@ class ProductTemplateHistory(APIView):
             return Response(status=200, data=serializer.data)
         else:
             return Response(status=404, data="not found!")
+
 
 class ProductTemplateDetail(generics.RetrieveAPIView):
     authentication_classes = [JWTAuthentication]
@@ -418,8 +416,7 @@ class Monitoring(APIView):
         else:
             product_id = ""
             template_product_name = ""
-            
-            
+
         object_id = None
         if request.data["object_id"] != "all":
             object_id = request.data["object_id"]
@@ -473,35 +470,40 @@ class Monitoring(APIView):
         products_arr = []
         kelgan_summa = 0
         ketgan_summa = 0
-        
+
         objects = Object.objects.filter(pk__icontains=object_id)
         object_res = []
         for obj in objects:
             if request.data["date_id"] == "1":
-                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name, object__pk__icontains=obj.pk, created_at__icontains=today)
+                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name,
+                                                                object__pk__icontains=obj.pk,
+                                                                created_at__icontains=today)
             elif request.data["date_id"] == "1":
-                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name, object__pk__icontains=obj.pk, created_at__icontains=yesterday)
+                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name,
+                                                                object__pk__icontains=obj.pk,
+                                                                created_at__icontains=yesterday)
             elif request.data["date_id"] == "1":
-                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name, object__pk__icontains=obj.pk, created_at__range=(seven_days_ago, tomorrow))
+                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name,
+                                                                object__pk__icontains=obj.pk,
+                                                                created_at__range=(seven_days_ago, tomorrow))
             elif request.data["date_id"] == "4":
-                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name, object__pk__icontains=obj.pk, created_at__icontains=month)
+                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name,
+                                                                object__pk__icontains=obj.pk,
+                                                                created_at__icontains=month)
             else:
-                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name, object__pk__icontains=obj.pk) 
-                
+                object_products = ObjectProducts.objects.filter(name__icontains=template_product_name,
+                                                                object__pk__icontains=obj.pk)
+
             p_summa = 0
-            
+
             for p in object_products:
                 p_summa += int(p.total_price)
-            
+
             object_res.append({
                 'name': obj.name,
                 'summa': p_summa,
                 'product_amount': len(object_products)
             })
-            
-        
-        
-        
 
         for product in products:
             if product.delivery.status == True:
@@ -594,7 +596,7 @@ class MonitoringChart(APIView):
         labels = []
 
         for w in warehouses:
-            
+
             if request.data["date_id"] == "1":
                 all_products = Product.objects.filter(created_at__icontains=today)
                 products = Product.objects.filter(
@@ -764,8 +766,6 @@ class MonitoringLineChart(APIView):
                 else:
                     ketgan_total_price = 0
 
-
-
             kelgan_summa = Product.objects.filter(
                 created_at__icontains=d, delivery__status=True, product__id__icontains=product_id,
             )
@@ -778,10 +778,31 @@ class MonitoringLineChart(APIView):
                 else:
                     kelgan_total_price = 0
 
-
-
             products_arr.append(
                 {"date": d, "ketgan": ketgan_total_price, "kelgan": kelgan_total_price}
             )
 
         return Response(products_arr)
+
+
+class CreateProductSetView(APIView):
+
+    @swagger_auto_schema(request_body=CreateProductSetSerializer)
+    def post(self, request):
+        serializer = CreateProductSetSerializer(data=request.data)
+
+        if serializer.is_valid():
+            object_id = serializer.validated_data["object"]
+            obj = Object.objects.get(pk=object_id)
+
+            product_set_data = {
+                "name": serializer.validated_data["name"],
+                "data_array": serializer.validated_data["data_array"],
+                "total_price": serializer.validated_data["total_price"],
+                "object": obj,
+            }
+            ProductSet.objects.create(**product_set_data)
+
+            return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
