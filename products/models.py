@@ -7,10 +7,9 @@ from warehouses.models import Warehouse
 
 
 class ProductSet(models.Model):
-    name = models.CharField(max_length=255)
     total_price = models.FloatField(null=True, blank=True)
     data_array = ArrayField(models.JSONField(), null=True, blank=True)
-    object = models.ForeignKey(Object, on_delete=CASCADE, null=True, blank=True)
+    object_id = models.ForeignKey(Object, on_delete=CASCADE, null=True, blank=True)
 
 
 class TemplateProduct(models.Model):

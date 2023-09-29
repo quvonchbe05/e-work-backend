@@ -101,9 +101,8 @@ class WarehousesMonitoringSerializer(serializers.ModelSerializer):
 
 
 class CreateProductSetSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255)
     total_price = serializers.FloatField()
     data_array = serializers.ListField()
-    object = serializers.IntegerField()
+    object_id = serializers.IntegerField()
 
 

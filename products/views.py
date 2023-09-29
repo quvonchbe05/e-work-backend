@@ -792,14 +792,13 @@ class CreateProductSetView(APIView):
         serializer = CreateProductSetSerializer(data=request.data)
 
         if serializer.is_valid():
-            object_id = serializer.validated_data["object"]
+            object_id = serializer.validated_data["object_id"]
             obj = Object.objects.get(pk=object_id)
 
             product_set_data = {
-                "name": serializer.validated_data["name"],
                 "data_array": serializer.validated_data["data_array"],
                 "total_price": serializer.validated_data["total_price"],
-                "object": obj,
+                "object_id": obj,
             }
             ProductSet.objects.create(**product_set_data)
 
