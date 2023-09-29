@@ -43,5 +43,5 @@ urlpatterns = [
     path('monitoring/linechart', MonitoringLineChart.as_view()),
 
     path('list/view/<int:pk>', ProductTemplateHistory.as_view()),
-    path('create/product/set', CreateProductSetView.as_view()),
+    path('product/set', CreateProductSetView.as_view()),
 ]
