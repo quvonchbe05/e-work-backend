@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from warehouses.models import Warehouse
 from warehouses.serializers import UserForWarehouseSerializer
-from .models import Delivery, TemplateProduct
+from .models import Delivery, TemplateProduct, ProductSet
 
 
 class ProductSerializer(serializers.Serializer):
@@ -100,9 +100,13 @@ class WarehousesMonitoringSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "address", "worker", "products")
 
 
-class CreateProductSetSerializer(serializers.Serializer):
+class ProductSetSerializer(serializers.Serializer):
     total_price = serializers.FloatField()
     data_array = serializers.ListField()
     object_id = serializers.IntegerField()
 
 
+class ProductSetListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductSet
+        fields = '__all__'

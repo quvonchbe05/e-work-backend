@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,7 +21,7 @@ from .serializers import (
     ProductTemplateEditSerializer,
     MonitoringSerializer,
     WarehousesMonitoringSerializer,
-    ProductTemplateHistorySerializer, CreateProductSetSerializer, )
+    ProductTemplateHistorySerializer, ProductSetSerializer, ProductSetListSerializer, )
 
 
 # Create your views here.
@@ -787,9 +788,9 @@ class MonitoringLineChart(APIView):
 
 class CreateProductSetView(APIView):
 
-    @swagger_auto_schema(request_body=CreateProductSetSerializer)
+    @swagger_auto_schema(request_body=ProductSetSerializer)
     def post(self, request):
-        serializer = CreateProductSetSerializer(data=request.data)
+        serializer = ProductSetSerializer(data=request.data)
 
         if serializer.is_valid():
             object_id = serializer.validated_data["object_id"]
@@ -805,3 +806,38 @@ class CreateProductSetView(APIView):
             return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProductSetDetailApi(APIView):
+
+    def get(self, request, pk):
+        obj = Object.objects.filter(pk=pk).first()
+        if not obj:
+            return Response(status=404, data={'error': 'Object not found'})
+
+        productsets = obj.productset.all()
+
+        if not productsets:
+            return Response(status=404, data={'error': 'ProductSets not found for this Object'})
+
+        productset_data = []
+        for productset in productsets:
+            productset_data.append({
+                'id': productset.pk,
+                'total_price': productset.total_price,
+                'data_array': productset.data_array
+            })
+
+        obj_json = {
+            'id': obj.pk,
+            'name': obj.name,
+            'address': obj.address,
+            'productsets': productset_data
+        }
+
+        return Response(status=200, data=obj_json)
+
+
+class ProductSetListAPi(ListAPIView):
+    queryset = ProductSet.objects.all()
+    serializer_class = ProductSetListSerializer

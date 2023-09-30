@@ -19,7 +19,7 @@ from .views import (
     WarehousesMonitoring,
     MonitoringChart,
     MonitoringLineChart,
-    ProductTemplateHistory, CreateProductSetView
+    ProductTemplateHistory, CreateProductSetView, ProductSetDetailApi, ProductSetListAPi
 )
 
 urlpatterns = [
@@ -43,5 +43,8 @@ urlpatterns = [
     path('monitoring/linechart', MonitoringLineChart.as_view()),
 
     path('list/view/<int:pk>', ProductTemplateHistory.as_view()),
-    path('product/set', CreateProductSetView.as_view()),
+    path('create/set', CreateProductSetView.as_view()),
+    path('set/list/<int:pk>', ProductSetDetailApi.as_view()),
+    path('set/list', ProductSetListAPi.as_view())
 ]
+

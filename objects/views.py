@@ -1,12 +1,14 @@
-from django.shortcuts import render
 from rest_framework import generics
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from bid.models import Bid, BidProduct, ObjectProductBase
 from .models import Object
 from .serializers import ObjectSerializer, ObjectListSerializer
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.views import APIView
-from bid.models import Bid, BidProduct, ObjectProductBase
-from rest_framework.response import Response
+
 
 # Create your views here.
 class ObjectList(generics.ListAPIView):
@@ -14,41 +16,29 @@ class ObjectList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Object.objects.all()
     serializer_class = ObjectListSerializer
-    
-    
-    
-    
-    
+
+
 class ObjectCreate(generics.CreateAPIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
-    
-    
-    
-    
-    
+
+
 class ObjectEdit(generics.UpdateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
-    
-    
-    
-    
-    
+
+
 class ObjectDelete(generics.DestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
-    
-    
-    
-    
-    
+
+
 class ObjectDetail(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
@@ -56,9 +46,9 @@ class ObjectDetail(APIView):
         object = Object.objects.filter(pk=pk).first()
         if not object:
             return Response(status=404, data={'error': 'Obyekt topilmadi'})
-        
+
         products = ObjectProductBase.objects.filter(object=object)
-        
+
         obj_json = {
             'id': object.pk,
             'name': object.name,
@@ -71,7 +61,7 @@ class ObjectDetail(APIView):
             'bids': [],
             'products': [],
         }
-        
+
         for p in products:
             obj_json['products'].append(
                 {
@@ -83,10 +73,9 @@ class ObjectDetail(APIView):
                     "created_at": p.created_at
                 }
             )
-        
+
         bid = Bid.objects.filter(object__pk=object.pk)
         bid_arr = []
-        
 
         for b in bid:
             obj_json['bids'].append(
@@ -103,9 +92,9 @@ class ObjectDetail(APIView):
         for b in obj_json['bids']:
             products = BidProduct.objects.filter(bid__pk=b["id"])
             for p in products:
-                b['total_summa'] = p.amount*int(p.product.price)
+                b['total_summa'] = p.amount * int(p.product.price)
                 b["products"].append(
                     {"id": p.pk, "name": p.product.name, "amount": p.amount, 'size': p.product.size}
                 )
-                
+
         return Response(status=200, data=obj_json)
