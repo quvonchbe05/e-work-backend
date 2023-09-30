@@ -1,5 +1,6 @@
 from datetime import datetime, date, timedelta
 
+from django.db.models import Sum
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.generics import ListAPIView
@@ -21,7 +22,7 @@ from .serializers import (
     ProductTemplateEditSerializer,
     MonitoringSerializer,
     WarehousesMonitoringSerializer,
-    ProductTemplateHistorySerializer, ProductSetSerializer, ProductSetListSerializer, )
+    ProductTemplateHistorySerializer, ProductSetListSerializer, ProductSetSerializer)
 
 
 # Create your views here.
@@ -827,12 +828,13 @@ class ProductSetDetailApi(APIView):
                 'total_price': productset.total_price,
                 'data_array': productset.data_array
             })
-
+        total_price_sum = productsets.aggregate(Sum('total_price'))['total_price__sum'] or 0
         obj_json = {
             'id': obj.pk,
             'name': obj.name,
             'address': obj.address,
-            'productsets': productset_data
+            'productsets': productset_data,
+            'total_price': total_price_sum,
         }
 
         return Response(status=200, data=obj_json)
