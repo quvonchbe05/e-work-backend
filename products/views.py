@@ -1,6 +1,10 @@
+import os
+import uuid
 from datetime import datetime, date, timedelta
 
+import pandas as pd
 from django.db.models import Sum
+from django.http import FileResponse
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.generics import ListAPIView
@@ -14,7 +18,8 @@ from accounts.utils import decode_jwt
 from bid.models import ObjectProducts
 from objects.models import Object
 from warehouses.models import Warehouse
-from .models import Product, Delivery, TemplateProduct, ProductBase, ProductSet
+from .models import Product, Delivery, TemplateProduct, ProductBase
+from .models import ProductSet
 from .serializers import (
     OrderSerializer,
     ProductListSerializer,
@@ -22,7 +27,8 @@ from .serializers import (
     ProductTemplateEditSerializer,
     MonitoringSerializer,
     WarehousesMonitoringSerializer,
-    ProductTemplateHistorySerializer, ProductSetListSerializer, ProductSetSerializer)
+    ProductTemplateHistorySerializer, ProductSetSerializer)
+from .serializers import ProductSetListSerializer
 
 
 # Create your views here.
@@ -843,3 +849,27 @@ class ProductSetDetailApi(APIView):
 class ProductSetListAPi(ListAPIView):
     queryset = ProductSet.objects.all()
     serializer_class = ProductSetListSerializer
+
+
+class ExportProductsAPI(APIView):
+    def get(self, request, pk):
+        products_objs = ProductSet.objects.filter(pk=pk)
+        serializer = ProductSetListSerializer(products_objs, many=True)
+        data = serializer.data
+        print(serializer.data)
+
+        directory_path = "export/excel/products"
+
+        os.makedirs(directory_path, exist_ok=True)
+
+        current_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
+        file_name = f"{current_datetime}_{uuid.uuid4()}.csv"
+        file_path = os.path.join(directory_path, file_name)
+
+        if not os.path.isfile(file_path):
+            df = pd.DataFrame(data)
+            df.to_csv(file_path, encoding="UTF-8", index=False)
+
+        response = FileResponse(open(file_path, 'rb'))
+        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+        return response
