@@ -855,12 +855,10 @@ class ExportProductsAPI(APIView):
     def get(self, request, pk):
         products_objs = ProductSet.objects.filter(pk=pk)
         if not products_objs:
-            error_message = "No products found."
-            return Response(data={"error": error_message}, status=status.HTTP_404_NOT_FOUND)
+            return Response(data={"error": "No productset found for this id"},
+                            status=status.HTTP_404_NOT_FOUND)
 
         serializer = ProductSetListSerializer(products_objs, many=True)
-        data = serializer.data
-        print(serializer.data)
 
         directory_path = "export/excel/products"
 
@@ -871,7 +869,7 @@ class ExportProductsAPI(APIView):
         file_path = os.path.join(directory_path, file_name)
 
         if not os.path.isfile(file_path):
-            df = pd.DataFrame(data)
+            df = pd.DataFrame(serializer.data)
             df.to_csv(file_path, encoding="UTF-8", index=False)
 
         response = FileResponse(open(file_path, 'rb'))
