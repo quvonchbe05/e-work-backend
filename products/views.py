@@ -5,6 +5,7 @@ from datetime import datetime, date, timedelta
 import pandas as pd
 from django.db.models import Sum
 from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.generics import ListAPIView
@@ -853,12 +854,14 @@ class ProductSetListAPi(ListAPIView):
 
 class ExportProductsAPI(APIView):
     def get(self, request, pk):
-        products_objs = ProductSet.objects.filter(pk=pk)
-        if not products_objs:
-            return Response(data={"error": "No productset found for this id"},
+
+        obj = get_object_or_404(Object, pk=pk)
+        projectset = ProductSet.objects.filter(object_id=obj)
+        if not projectset:
+            return Response(data={"error": "No productset found for this object"},
                             status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ProductSetListSerializer(products_objs, many=True)
+        serializer = ProductSetListSerializer(projectset, many=True)
 
         directory_path = "export/excel/products"
 
