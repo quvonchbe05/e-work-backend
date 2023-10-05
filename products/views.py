@@ -854,6 +854,10 @@ class ProductSetListAPi(ListAPIView):
 class ExportProductsAPI(APIView):
     def get(self, request, pk):
         products_objs = ProductSet.objects.filter(pk=pk)
+        if not products_objs:
+            error_message = "No products found."
+            return Response(data={"error": error_message}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = ProductSetListSerializer(products_objs, many=True)
         data = serializer.data
         print(serializer.data)
