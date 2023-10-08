@@ -14,3 +14,5 @@ django-cors-headers
 python-dotenv
 PyJWT
 cryptography
+fpdf
+requests

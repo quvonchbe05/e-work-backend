@@ -1,13 +1,12 @@
-import os
-import uuid
 from datetime import datetime, date, timedelta
-
-import pandas as pd
 from django.db.models import Sum
-from django.http import FileResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, status
+from fpdf import FPDF
+from requests import Response
+from rest_framework import generics
+from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -28,8 +27,7 @@ from .serializers import (
     ProductTemplateEditSerializer,
     MonitoringSerializer,
     WarehousesMonitoringSerializer,
-    ProductTemplateHistorySerializer, ProductSetSerializer)
-from .serializers import ProductSetListSerializer
+    ProductTemplateHistorySerializer, ProductSetSerializer, ProductSetListSerializer)
 
 
 # Create your views here.
@@ -854,27 +852,57 @@ class ProductSetListAPi(ListAPIView):
 
 class ExportProductsAPI(APIView):
     def get(self, request, pk):
-
         obj = get_object_or_404(Object, pk=pk)
-        projectset = ProductSet.objects.filter(object_id=obj)
-        if not projectset:
-            return Response(data={"error": "No productset found for this object"},
-                            status=status.HTTP_404_NOT_FOUND)
+        try:
+            projectset = ProductSet.objects.filter(object_id=obj)
+            serializer = ProductSetListSerializer(projectset, many=True)
+        except ProductSet.DoesNotExist:
+            return Response(data={"error": "No productset found for this object"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ProductSetListSerializer(projectset, many=True)
+        pdf = FPDF()
 
-        directory_path = "export/excel/products"
+        for item in serializer.data:
+            branch_name = item['data_array'][0]['name']
+            total_price = item['total_price']
+            products = item['data_array'][0]['products']
 
-        os.makedirs(directory_path, exist_ok=True)
+            pdf.add_page()  # Add a page for each branch
 
-        current_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
-        file_name = f"{current_datetime}_{uuid.uuid4()}.csv"
-        file_path = os.path.join(directory_path, file_name)
+            pdf.set_font("Arial", 'B', 11)  # Set font and size for the table
 
-        if not os.path.isfile(file_path):
-            df = pd.DataFrame(serializer.data)
-            df.to_csv(file_path, encoding="UTF-8", index=False)
+            pdf.set_fill_color(200, 220, 255)  # Set the background color for header cells
 
-        response = FileResponse(open(file_path, 'rb'))
-        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+            col_width = [60, 40, 20, 20, 30, 50]  # Adjust column widths as needed
+
+            # First table for branch name
+            pdf.cell(col_width[0], 10, "Branch Name", 0, 0, 'L', fill=True)
+            pdf.cell(col_width[-1], 10, branch_name, 0, 1, 'C', fill=True)
+
+            # Second table for product details
+            pdf.cell(col_width[0], 10, "Product Name", 1)
+            pdf.cell(col_width[1], 10, "Size", 1)
+            pdf.cell(col_width[2], 10, "Count", 1)
+            pdf.cell(col_width[3], 10, "Price", 1)
+            pdf.cell(col_width[4], 10, "Total Price", 1)
+            pdf.ln()
+
+            for product in products:
+                pdf.cell(col_width[0], 10, product['name'], 1)
+                pdf.cell(col_width[1], 10, product['size'], 1)
+                pdf.cell(col_width[2], 10, product['amount'], 1)
+                pdf.cell(col_width[3], 10, product['price'], 1)
+                pdf.cell(col_width[4], 10, str(float(product['price']) * float(product['amount'])), 1)
+                pdf.ln()
+
+            # Third table for branch total price
+            pdf.cell(col_width[0], 10, "Total Price", 0, 0, 'L', fill=True)
+            pdf.cell(col_width[-1], 10, str(total_price), 0, 1, 'C', fill=True)
+
+        # Generate the PDF content as a string
+        pdf_content = pdf.output(dest='S').encode('latin1')  # noqa
+
+        # Create a response with the PDF content
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+
         return response
