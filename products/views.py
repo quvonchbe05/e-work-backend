@@ -1,6 +1,8 @@
+import io
 from datetime import datetime, date, timedelta
+
 from django.db.models import Sum
-from django.http import HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from fpdf import FPDF
@@ -901,8 +903,7 @@ class ExportProductsAPI(APIView):
         # Generate the PDF content as a string
         pdf_content = pdf.output(dest='S').encode('latin1')  # noqa
 
-        # Create a response with the PDF content
-        response = HttpResponse(pdf_content, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+        response = FileResponse(io.BytesIO(pdf_content), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="output_{obj.pk}.pdf"'
 
         return response
