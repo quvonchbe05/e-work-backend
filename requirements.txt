@@ -2,7 +2,7 @@ pandas
 asgiref
 Django
 gunicorn
-psycopg2
+psycopg2-binary
 sqlparse
 whitenoise
 djangorestframework

@@ -6,6 +6,8 @@ urlpatterns = [
     path('auth/login', LoginView.as_view()),
     path('auth/users/first/edit', UserFirtEdit.as_view()),
     path('auth/users/me', UserMe.as_view()),
+    path('auth/user/create', UserCreate.as_view()),
+    path('auth/user/reset/password', GenerateNewPassword.as_view()),
     
     path('workers/create', UserCreate.as_view()),
     path('workers/generate-password/<int:pk>', GenerateNewPassword.as_view()),
