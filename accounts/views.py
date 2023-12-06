@@ -24,14 +24,15 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            request.user.auth_token.delete()
+            # Suggest the client to delete the token
+            response = Response(
+                status=status.HTTP_200_OK,
+                data={"detail": "Successfully logged out. Delete the token from the client side."}
+            )
+            return response
 
         except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": "Failed to log out."})
-
-        logout(request)
-        return Response({"success": "Successfully logged out."},
-                        status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": f"Failed to log out."})
 
 
 class LoginView(APIView):
