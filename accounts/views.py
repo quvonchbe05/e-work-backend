@@ -1,6 +1,6 @@
 import random
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
@@ -24,11 +24,14 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            response = Response(status=status.HTTP_200_OK, data={"detail": "Successfully logged out."})
-            response.delete_cookie("access_token")
-            return response
+            request.user.auth_token.delete()
+
         except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": f"Failed to log out."})
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": "Failed to log out."})
+
+        logout(request)
+        return Response({"success": "Successfully logged out."},
+                        status=status.HTTP_200_OK)
 
 
 class LoginView(APIView):
