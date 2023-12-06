@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import LoginView, UserFirtEdit, UserCreate, GenerateNewPassword, UserList, UserEdit, UserDelete, UserDetail, UserMe
-
+from .views import LoginView, UserFirtEdit, UserCreate, GenerateNewPassword, UserList, UserEdit, UserDelete, UserDetail, \
+    UserMe, LogoutView
 
 urlpatterns = [
     path('auth/login', LoginView.as_view()),
@@ -8,7 +8,8 @@ urlpatterns = [
     path('auth/users/me', UserMe.as_view()),
     path('auth/user/create', UserCreate.as_view()),
     path('auth/user/reset/password', GenerateNewPassword.as_view()),
-    
+    path('api/logout/', LogoutView.as_view()),
+
     path('workers/create', UserCreate.as_view()),
     path('workers/generate-password/<int:pk>', GenerateNewPassword.as_view()),
     path('workers/list', UserList.as_view()),

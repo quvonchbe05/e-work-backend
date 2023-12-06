@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,7 +18,17 @@ from .serializers import LoginSerializer, UserCreateSerializer, UserFirstEditSer
 from .utils import decode_jwt
 
 
-# Create your views here.
+class LogoutView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            response = Response(status=status.HTTP_200_OK, data={"detail": "Successfully logged out."})
+            response.delete_cookie("access_token")
+            return response
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": f"Failed to log out."})
 
 
 class LoginView(APIView):
