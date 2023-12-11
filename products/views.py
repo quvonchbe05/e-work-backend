@@ -230,8 +230,8 @@ class ProductByWarehouseList(APIView):
 
 
 class ProductOutgoingList(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         token = decode_jwt(request)
@@ -323,8 +323,8 @@ class ProductOutgoing(APIView):
 
 
 class ProductWarehouseHistoryList(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         token = decode_jwt(request)
