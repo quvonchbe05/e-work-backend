@@ -907,3 +907,34 @@ class ExportProductsAPI(APIView):
         response['Content-Disposition'] = f'attachment; filename="output_{obj.pk}.pdf"'
 
         return response
+
+
+class GetProductDeliveryAPi(APIView):
+
+    def get(self, request):
+        product_data = Product.objects.all().order_by('-created_at')[:5]
+        result = []
+
+        for product in product_data:
+            delivery_info = {
+                'name': product.delivery.name,
+                'phone': product.delivery.phone
+            }
+
+            try:
+                template_product = TemplateProduct.objects.get(pk=product.product_id)
+            except TemplateProduct.DoesNotExist:
+                template_product = None
+
+            if template_product:
+                productbase_info = {
+                    'amount': product.amount,
+                    'product_name': template_product.name,
+                    'created_at': product.created_at
+                }
+                result.append({
+                    'delivery_info': delivery_info,
+                    'productbase_info': productbase_info
+                })
+
+        return Response(result)
