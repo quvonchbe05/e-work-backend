@@ -930,6 +930,7 @@ class GetProductDeliveryAPi(APIView):
                 productbase_info = {
                     'amount': product.amount,
                     'product_name': template_product.name,
+                    'size': template_product.size,
                     'created_at': product.created_at
                 }
                 result.append({
