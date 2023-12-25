@@ -54,6 +54,7 @@ class ProductSAdminEdit(APIView):
             new_delivery.save()
 
             token = decode_jwt(request)
+            # token = 8
             if token:
                 user = CustomUser.objects.filter(pk=token["user_id"]).first()
                 warehouse = Warehouse.objects.filter(worker=user.pk).first()
@@ -235,6 +236,7 @@ class ProductOutgoingList(APIView):
 
     def get(self, request):
         token = decode_jwt(request)
+        # token = 8
         user = CustomUser.objects.filter(pk=token["user_id"]).first()
         warehouse = Warehouse.objects.filter(worker=user.pk).first()
         incoming = ProductBase.objects.filter(warehouse__id=warehouse.pk)
@@ -247,8 +249,8 @@ class ProductOutgoingList(APIView):
 
 
 class ProductOutgoing(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=OrderSerializer)
     def post(self, request):
@@ -267,8 +269,10 @@ class ProductOutgoing(APIView):
             new_delivery.save()
 
             token = decode_jwt(request)
+            # token = 8
             if token:
                 user = CustomUser.objects.filter(pk=token["user_id"]).first()
+
                 warehouse = Warehouse.objects.filter(worker=user.pk).first()
 
                 for product in products:
