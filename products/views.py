@@ -249,8 +249,8 @@ class ProductOutgoingList(APIView):
 
 
 class ProductOutgoing(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=OrderSerializer)
     def post(self, request):
@@ -913,10 +913,43 @@ class ExportProductsAPI(APIView):
         return response
 
 
-class GetProductDeliveryAPi(APIView):
+class GetIncomingProductDeliveryAPi(APIView):
 
     def get(self, request):
         product_data = Product.objects.all().order_by('-created_at')[:5]
+        result = []
+
+        for product in product_data:
+            if product.delivery.status == True:
+                delivery_info = {
+                    'name': product.delivery.name,
+                    'phone': product.delivery.phone
+                }
+
+                try:
+                    template_product = TemplateProduct.objects.get(pk=product.product_id)
+                    productbase_info = {
+                        'amount': product.amount,
+                        'product_name': template_product.name,
+                        'size': template_product.size,
+                        'created_at': product.created_at
+                    }
+                    result.append({
+                        'delivery_info': delivery_info,
+                        'productbase_info': productbase_info
+                    })
+                except TemplateProduct.DoesNotExist:
+                    template_product = None
+        return Response(result)
+
+
+class GetIncomingProductsDeliveryAPI(APIView):
+    def get(self, request):
+        product_data = Product.objects.filter(delivery__status=True).order_by('-created_at')[:5]
+        result = self.get_product_info(product_data)
+        return Response(result)
+
+    def get_product_info(self, product_data):
         result = []
 
         for product in product_data:
@@ -925,21 +958,48 @@ class GetProductDeliveryAPi(APIView):
                 'phone': product.delivery.phone
             }
 
-            try:
-                template_product = TemplateProduct.objects.get(pk=product.product_id)
-            except TemplateProduct.DoesNotExist:
-                template_product = None
+            template_product = get_object_or_404(TemplateProduct, pk=product.product_id)
+            productbase_info = {
+                'amount': product.amount,
+                'product_name': template_product.name,
+                'size': template_product.size,
+                'created_at': product.created_at
+            }
 
-            if template_product:
-                productbase_info = {
-                    'amount': product.amount,
-                    'product_name': template_product.name,
-                    'size': template_product.size,
-                    'created_at': product.created_at
-                }
-                result.append({
-                    'delivery_info': delivery_info,
-                    'productbase_info': productbase_info
-                })
+            result.append({
+                'delivery_info': delivery_info,
+                'productbase_info': productbase_info
+            })
 
+        return result
+
+
+class GetOutgoingProductsDeliveryAPI(APIView):
+    def get(self, request):
+        product_data = Product.objects.filter(delivery__status=False).order_by('-created_at')[:5]
+        result = self.get_product_info(product_data)
         return Response(result)
+
+    def get_product_info(self, product_data):
+        result = []
+
+        for product in product_data:
+            delivery_info = {
+                'name': product.delivery.name,
+                'phone': product.delivery.phone
+            }
+
+            template_product = get_object_or_404(TemplateProduct, pk=product.product_id)
+            productbase_info = {
+                'amount': product.amount,
+                'product_name': template_product.name,
+                'size': template_product.size,
+                'created_at': product.created_at
+            }
+
+            result.append({
+                'delivery_info': delivery_info,
+                'productbase_info': productbase_info
+            })
+
+        return result
